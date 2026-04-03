@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thermo Solver — ChemE Desk</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .mode-toggle {
+      display: flex;
+      border: 1px solid var(--border-dark);
+      border-radius: 3px;
+      overflow: hidden;
+      width: fit-content;
+      margin-bottom: 1.2rem;
+    }
+
+    .mode-btn {
+      padding: 0.5rem 1.2rem;
+      font-family: var(--font);
+      font-size: 0.88rem;
+      border: none;
+      background: var(--white);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .mode-btn:first-child { border-right: 1px solid var(--border-dark); }
+
+    .mode-btn.active {
+      background: var(--prussian);
+      color: var(--white);
+    }
+
+    .usage-bar-wrap {
+      background: var(--off-white);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.8rem 1.1rem;
+      margin-bottom: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .usage-label { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
+
+    .usage-track {
+      flex: 1;
+      min-width: 120px;
+      height: 5px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .usage-fill {
+      height: 100%;
+      background: var(--lochmara);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .usage-fill.warn { background: var(--amber); }
+
+    .usage-reset { font-size: 0.78rem; color: var(--text-dim); font-style: italic; white-space: nowrap; }
+
+    .topic-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .topic-chip {
+      padding: 0.3rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-family: var(--font);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      background: var(--white);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .topic-chip.active {
+      background: var(--lochmara);
+      border-color: var(--lochmara);
+      color: var(--white);
+    }
+
+    .topic-chip:hover:not(.active) { border-color: var(--lochmara); color: var(--prussian); }
+
+    .mode-description {
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 1.2rem;
+      padding: 0.6rem 0.9rem;
+      background: var(--off-white);
+      border-radius: 3px;
+      border-left: 3px solid var(--border-dark);
+    }
+
+    .solve-btn-row {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .loading {
+      display: none;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .loading.visible { display: flex; }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--lochmara);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .response-area {
+      margin-top: 1.4rem;
+      display: none;
+    }
+
+    .response-area.visible { display: block; }
+
+    .response-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--lochmara);
+      border-radius: 0 3px 3px 0;
+      padding: 1.5rem 1.6rem;
+      font-size: 0.93rem;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .response-box strong { color: var(--prussian); }
+
+    .followup-area {
+      margin-top: 1.2rem;
+      display: none;
+    }
+
+    .followup-area.visible { display: block; }
+
+    .followup-row {
+      display: flex;
+      gap: 0.7rem;
+    }
+
+    .stuck-btn {
+      background: var(--amber-bg);
+      border: 1px solid var(--amber-border);
+      color: var(--amber);
+      padding: 0.55rem 1rem;
+      font-family: var(--font);
+      font-size: 0.85rem;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .stuck-btn:hover { background: #fef0c0; }
+
+    .paywall-card {
+      background: var(--lochmara-bg);
+      border: 1px solid var(--border-dark);
+      border-radius: 4px;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 1.4rem;
+    }
+
+    .paywall-card h3 { color: var(--prussian); font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .paywall-card p { color: var(--text-muted); font-size: 0.9rem; font-style: italic; margin-bottom: 1.2rem; }
+
+    .example-problems {
+      margin-bottom: 1rem;
+    }
+
+    .example-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: var(--off-white);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.6rem 0.9rem;
+      font-family: var(--font);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .example-btn:hover { border-color: var(--lochmara); color: var(--prussian); }
+
+    .conversation-history {
+      margin-top: 1rem;
+    }
+
+    .chat-bubble {
+      margin-bottom: 1rem;
+      padding: 1rem 1.2rem;
+      border-radius: 3px;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .chat-bubble.user {
+      background: var(--lochmara-bg);
+      border: 1px solid var(--border-dark);
+      color: var(--prussian);
+    }
+
+    .chat-bubble.assistant {
+      background: var(--off-white);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--lochmara);
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    .bubble-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">ChemE<span> Desk</span></a>
+    <ul class="nav-links">
+      <li><a href="unit-converter.html">Unit Converter</a></li>
+      <li><a href="interpolation.html">Interpolation</a></li>
+      <li><a href="solver.html" class="active">Thermo Solver</a></li>
+      <li><a href="index.html#pricing" class="nav-cta">Get early access</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="tool-header">
+  <div class="tool-header-inner">
+    <div class="breadcrumb"><a href="index.html">ChemE Desk</a> / Thermo Solver</div>
+    <span class="tier-tag tier-account">Free account — 5 uses per 2 months</span>
+    <h1>Thermodynamics Solver</h1>
+    <p>Paste a problem. Get a full step-by-step solution — or choose Tutor mode to be guided through it.</p>
+  </div>
+</div>
+
+<div class="tool-body">
+
+  <!-- Usage counter -->
+  <div class="usage-bar-wrap" id="usage-bar-wrap">
+    <span class="usage-label" id="usage-label">Loading...</span>
+    <div class="usage-track"><div class="usage-fill" id="usage-fill" style="width:0%"></div></div>
+    <span class="usage-reset" id="usage-reset"></span>
+  </div>
+
+  <div class="card">
+
+    <!-- Mode -->
+    <label>Mode</label>
+    <div class="mode-toggle" style="margin-bottom:0.6rem;">
+      <button class="mode-btn active" id="btn-solve" onclick="setMode('solve')">Solve it</button>
+      <button class="mode-btn" id="btn-tutor" onclick="setMode('tutor')">Tutor me</button>
+    </div>
+    <div class="mode-description" id="mode-desc">
+      <strong>Solve it:</strong> Paste your problem and get a complete, step-by-step solution with all work shown.
+    </div>
+
+    <!-- Topic -->
+    <label>Topic (optional — helps focus the response)</label>
+    <div class="topic-chips" id="topic-chips">
+      <button class="topic-chip active" onclick="setTopic('General Thermodynamics', this)">General</button>
+      <button class="topic-chip" onclick="setTopic('Energy Balances', this)">Energy Balances</button>
+      <button class="topic-chip" onclick="setTopic('Entropy & the Second Law', this)">Entropy</button>
+      <button class="topic-chip" onclick="setTopic('Phase Equilibrium', this)">Phase Equilibrium</button>
+      <button class="topic-chip" onclick="setTopic('Power Cycles (Rankine, Carnot)', this)">Power Cycles</button>
+      <button class="topic-chip" onclick="setTopic('Refrigeration & Heat Pumps', this)">Refrigeration</button>
+      <button class="topic-chip" onclick="setTopic('Equations of State', this)">Equations of State</button>
+      <button class="topic-chip" onclick="setTopic('Ideal Gas Law', this)">Ideal Gas</button>
+    </div>
+
+    <!-- Example problems -->
+    <label>Example problems</label>
+    <div class="example-problems">
+      <button class="example-btn" onclick="loadExample(0)">Energy balance: Steam enters a turbine at 3 MPa, 400°C (h = 3230.9 kJ/kg) and exits at 0.1 MPa (h = 2675.5 kJ/kg). Mass flow 5 kg/s, adiabatic. Find power output.</button>
+      <button class="example-btn" onclick="loadExample(1)">Carnot efficiency: Heat engine between 800 K and 300 K. Q_H = 500 kJ/cycle. Find thermal efficiency and net work output.</button>
+      <button class="example-btn" onclick="loadExample(2)">Entropy: 2 kg of air (ideal gas, Cp = 1.005 kJ/kg·K) is heated at constant pressure from 300 K to 500 K. Find the entropy change.</button>
+    </div>
+
+    <!-- Problem input -->
+    <label for="problem-input">Your problem</label>
+    <textarea id="problem-input" rows="6" placeholder="Paste or type your thermodynamics problem here. Include all given values and units."></textarea>
+
+    <div class="solve-btn-row">
+      <button class="btn-primary" id="solve-btn" onclick="submitProblem()">Solve</button>
+      <div class="loading" id="loading-indicator">
+        <div class="spinner"></div>
+        <span id="loading-text">Solving...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Response -->
+  <div class="response-area" id="response-area">
+    <div class="conversation-history" id="conversation-history"></div>
+
+    <!-- Follow-up (tutor mode) -->
+    <div class="followup-area" id="followup-area">
+      <div class="followup-row">
+        <input type="text" id="followup-input" placeholder="Ask a follow-up or show your work..." style="flex:1;" />
+        <button class="btn-primary" onclick="sendFollowup()">Send</button>
+        <button class="stuck-btn" id="stuck-btn" onclick="sendStuck()" style="display:none;">I'm stuck</button>
+      </div>
+    </div>
+
+    <div class="disclaimer" style="margin-top:1rem;">
+      If this problem uses steam table or thermodynamic property values, those values may be approximated. Always verify against your textbook before submitting coursework.
+    </div>
+  </div>
+
+  <!-- Paywall -->
+  <div class="paywall-card" id="paywall-card" style="display:none;">
+    <h3>You have used all 5 solves for this period</h3>
+    <p>Your count resets in <span id="paywall-reset"></span>. Sign up for a free account to track your usage, or go premium for unlimited access.</p>
+    <div style="display:flex; gap:0.8rem; justify-content:center; flex-wrap:wrap;">
+      <a href="index.html#top" class="btn-primary">Get early access</a>
+      <a href="index.html#pricing" class="btn-secondary">See plans</a>
+    </div>
+  </div>
+
+</div>
+
+<footer class="tool-footer">
+  <p><a href="index.html">ChemE Desk</a> &nbsp;&middot;&nbsp; Built by a chemical engineering student, for chemical engineering students.</p>
+</footer>
+
+<script>
+// ============================================================
+//  USAGE TRACKING (localStorage — client-side MVP)
+// ============================================================
+const LIMIT  = 5;
+const PERIOD = 2 * 30 * 24 * 60 * 60 * 1000; // 2 months in ms
+const KEY    = 'chemedesk_solver_v1';
+
+function getUsage() {
+  try {
+    const s = localStorage.getItem(KEY);
+    if (!s) return { count: 0, start: Date.now() };
+    const u = JSON.parse(s);
+    if (Date.now() - u.start > PERIOD) return { count: 0, start: Date.now() };
+    return u;
+  } catch { return { count: 0, start: Date.now() }; }
+}
+
+function saveUsage(u) {
+  try { localStorage.setItem(KEY, JSON.stringify(u)); } catch {}
+}
+
+function incrementUsage() {
+  const u = getUsage();
+  u.count += 1;
+  saveUsage(u);
+  return u;
+}
+
+function canUse() { return getUsage().count < LIMIT; }
+
+function resetDate(startMs) {
+  const end = new Date(startMs + PERIOD);
+  return end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function updateUsageUI() {
+  const u      = getUsage();
+  const remain = Math.max(0, LIMIT - u.count);
+  const pct    = Math.min(100, (u.count / LIMIT) * 100);
+  const fill   = document.getElementById('usage-fill');
+
+  document.getElementById('usage-label').textContent = `${u.count} of ${LIMIT} solves used`;
+  fill.style.width = pct + '%';
+  fill.classList.toggle('warn', u.count >= LIMIT - 1);
+  document.getElementById('usage-reset').textContent = `resets ${resetDate(u.start)}`;
+
+  if (!canUse()) {
+    document.getElementById('solve-btn').disabled = true;
+    document.getElementById('paywall-reset').textContent = resetDate(u.start);
+    document.getElementById('paywall-card').style.display = 'block';
+  }
+}
+
+// ============================================================
+//  MODE & TOPIC
+// ============================================================
+let currentMode  = 'solve';
+let currentTopic = 'General Thermodynamics';
+let messages     = [];
+
+const MODE_DESC = {
+  solve: '<strong>Solve it:</strong> Paste your problem and get a complete, step-by-step solution with all work shown.',
+  tutor: '<strong>Tutor me:</strong> Instead of giving you the answer, the solver will ask guiding questions and give hints — helping you arrive at the solution yourself. Use "I\'m stuck" for a bigger nudge.'
+};
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('btn-solve').classList.toggle('active', mode === 'solve');
+  document.getElementById('btn-tutor').classList.toggle('active', mode === 'tutor');
+  document.getElementById('mode-desc').innerHTML = MODE_DESC[mode];
+  document.getElementById('stuck-btn').style.display = mode === 'tutor' ? 'block' : 'none';
+}
+
+function setTopic(topic, btn) {
+  currentTopic = topic;
+  document.querySelectorAll('.topic-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+const EXAMPLES = [
+  'Steam enters a turbine at 3 MPa and 400°C with an enthalpy of 3230.9 kJ/kg and exits at 0.1 MPa with an enthalpy of 2675.5 kJ/kg. The mass flow rate is 5 kg/s. Assume steady-state, adiabatic operation. Find the power output of the turbine.',
+  'A Carnot heat engine operates between a high-temperature reservoir at 800 K and a low-temperature reservoir at 300 K. The engine absorbs 500 kJ of heat from the hot reservoir per cycle. Find (a) the thermal efficiency and (b) the net work output per cycle.',
+  '2 kg of air is heated at constant pressure from 300 K to 500 K. Assume air is an ideal gas with Cp = 1.005 kJ/(kg·K). Find the change in entropy of the air.'
+];
+
+function loadExample(i) {
+  document.getElementById('problem-input').value = EXAMPLES[i];
+}
+
+// ============================================================
+//  API CALL
+// ============================================================
+async function callAPI(userMessage) {
+  messages.push({ role: 'user', content: userMessage });
+
+  const response = await fetch('/api/solve', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      mode:     currentMode,
+      topic:    currentTopic,
+      messages: messages
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'Something went wrong. Please try again.');
+  }
+
+  const data = await response.json();
+  const reply = data.solution;
+  messages.push({ role: 'assistant', content: reply });
+  return reply;
+}
+
+function addBubble(role, text) {
+  const hist  = document.getElementById('conversation-history');
+  const div   = document.createElement('div');
+  div.className = `chat-bubble ${role}`;
+  const lbl   = document.createElement('div');
+  lbl.className = 'bubble-label';
+  lbl.textContent = role === 'user' ? 'Your problem' : (currentMode === 'tutor' ? 'Tutor' : 'Solution');
+  div.appendChild(lbl);
+  const body = document.createElement('div');
+  body.textContent = text;
+  div.appendChild(body);
+  hist.appendChild(div);
+  div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  return div;
+}
+
+function setLoading(on, text = 'Solving...') {
+  document.getElementById('loading-indicator').classList.toggle('visible', on);
+  document.getElementById('loading-text').textContent = text;
+  document.getElementById('solve-btn').disabled = on || !canUse();
+}
+
+async function submitProblem() {
+  const problem = document.getElementById('problem-input').value.trim();
+  if (!problem) { alert('Please enter a problem first.'); return; }
+  if (!canUse()) { document.getElementById('paywall-card').style.display = 'block'; return; }
+
+  // Reset conversation
+  messages = [];
+  document.getElementById('conversation-history').innerHTML = '';
+
+  const u = incrementUsage();
+  updateUsageUI();
+
+  setLoading(true, currentMode === 'tutor' ? 'Thinking about how to guide you...' : 'Solving...');
+  document.getElementById('response-area').classList.add('visible');
+
+  try {
+    addBubble('user', problem);
+    const reply = await callAPI(problem);
+    addBubble('assistant', reply);
+    document.getElementById('followup-area').classList.add('visible');
+    if (currentMode === 'tutor') {
+      document.getElementById('stuck-btn').style.display = 'block';
+    }
+  } catch (err) {
+    addBubble('assistant', 'Error: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function sendFollowup() {
+  const input = document.getElementById('followup-input');
+  const text  = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  await sendMessage(text);
+}
+
+async function sendStuck() {
+  await sendMessage('I am stuck. Can you give me a bigger hint without giving away the full answer?');
+}
+
+async function sendMessage(text) {
+  setLoading(true, 'Thinking...');
+  try {
+    addBubble('user', text);
+    const reply = await callAPI(text);
+    addBubble('assistant', reply);
+  } catch (err) {
+    addBubble('assistant', 'Error: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+// Enter key in followup
+document.getElementById('followup-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendFollowup(); }
+});
+
+// Init
+updateUsageUI();
+</script>
+</body>
+</html>
