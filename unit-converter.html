@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unit Converter — ChemE Desk</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --prussian:#00304C; --lochmara:#008BC0; --lochmara-d:#006fa3;
+      --lochmara-l:#1aa3d9; --lochmara-bg:#e8f6fc; --white:#ffffff;
+      --off-white:#f7fbfd; --border:#c8e4f0; --border-dark:#a0cfe4;
+      --text:#0d2d3f; --text-muted:#3a6880; --text-dim:#7aafc8;
+      --amber:#b06d00; --amber-bg:#fef8ec; --amber-border:#f0d080;
+      --green:#1a7a4a; --green-bg:#eaf6f0;
+      --font:'Times New Roman',Times,serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family:var(--font); background:var(--white); color:var(--text); font-size:16px; line-height:1.65; }
+
+    /* NAV */
+    nav { background:var(--prussian); border-bottom:3px solid var(--lochmara); position:sticky; top:0; z-index:100; }
+    .nav-inner { max-width:1140px; margin:0 auto; padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:58px; gap:1rem; }
+    .nav-logo { font-size:1.15rem; font-weight:bold; color:var(--white); text-decoration:none; white-space:nowrap; flex-shrink:0; }
+    .nav-logo span { color:var(--lochmara-l); }
+    .nav-links { display:flex; list-style:none; align-items:center; }
+    .nav-links a { color:rgba(255,255,255,0.58); text-decoration:none; font-size:0.88rem; padding:0 0.9rem; height:58px; display:flex; align-items:center; border-bottom:2px solid transparent; margin-bottom:-3px; white-space:nowrap; transition:color 0.15s,border-color 0.15s; }
+    .nav-links a:hover { color:var(--white); }
+    .nav-links a.active { color:var(--white); border-bottom-color:var(--lochmara-l); }
+    .nav-cta { background:var(--lochmara) !important; color:var(--white) !important; padding:0.38rem 1rem !important; border-radius:3px; height:auto !important; border-bottom:none !important; margin:0 !important; font-size:0.85rem !important; }
+    .nav-cta:hover { background:var(--lochmara-d) !important; }
+
+    /* TOOL HEADER */
+    .tool-header { background:var(--prussian); padding:2.8rem 2rem 2.4rem; border-bottom:1px solid rgba(255,255,255,0.08); }
+    .tool-header-inner { max-width:1140px; margin:0 auto; }
+    .breadcrumb { font-size:0.78rem; color:rgba(255,255,255,0.38); margin-bottom:0.6rem; }
+    .breadcrumb a { color:var(--lochmara-l); text-decoration:none; }
+    .tool-header h1 { font-size:1.85rem; color:var(--white); font-weight:bold; margin-bottom:0.35rem; }
+    .tool-header p { color:rgba(255,255,255,0.52); font-size:0.93rem; font-style:italic; }
+    .tier-tag { display:inline-block; font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; padding:0.2rem 0.6rem; border-radius:2px; margin-bottom:0.8rem; }
+    .tier-free { background:var(--green-bg); color:var(--green); }
+
+    /* BODY */
+    .tool-body { max-width:1140px; margin:0 auto; padding:2.5rem 2rem; }
+
+    /* COMMON */
+    label { display:block; font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.4rem; }
+    input[type="text"], input[type="number"], select, textarea { width:100%; font-family:var(--font); font-size:0.95rem; color:var(--text); background:var(--white); border:1px solid var(--border-dark); border-radius:3px; padding:0.6rem 0.85rem; outline:none; transition:border-color 0.15s; }
+    input[type="number"]:focus, select:focus { border-color:var(--lochmara); }
+    .btn-primary { background:var(--lochmara); color:var(--white); border:none; padding:0.7rem 1.7rem; font-family:var(--font); font-size:0.95rem; cursor:pointer; border-radius:3px; transition:background 0.15s; letter-spacing:0.02em; }
+    .btn-primary:hover { background:var(--lochmara-d); }
+    .card { background:var(--off-white); border:1px solid var(--border); border-radius:4px; padding:1.6rem; margin-bottom:1.2rem; }
+    .row { display:flex; gap:1.2rem; align-items:flex-end; }
+    .row > * { flex:1; }
+    .tool-footer { background:var(--prussian); padding:1.5rem 2rem; text-align:center; margin-top:4rem; }
+    .tool-footer p { font-size:0.82rem; color:rgba(255,255,255,0.35); }
+    .tool-footer a { color:var(--lochmara-l); text-decoration:none; }
+
+    /* TOOL-SPECIFIC */
+    .category-pills { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.8rem; }
+    .pill { padding:0.4rem 1rem; border:1px solid var(--border-dark); border-radius:20px; font-family:var(--font); font-size:0.85rem; color:var(--text-muted); background:var(--white); cursor:pointer; transition:all 0.15s; }
+    .pill:hover { border-color:var(--lochmara); color:var(--prussian); }
+    .pill.active { background:var(--lochmara); border-color:var(--lochmara); color:var(--white); }
+
+    .converter-grid { display:grid; grid-template-columns:1fr auto 1fr; gap:1rem; align-items:end; margin-bottom:1.4rem; }
+    .swap-btn { background:none; border:1px solid var(--border-dark); border-radius:50%; width:38px; height:38px; font-size:1.1rem; cursor:pointer; color:var(--text-muted); display:flex; align-items:center; justify-content:center; transition:border-color 0.15s,color 0.15s; flex-shrink:0; }
+    .swap-btn:hover { border-color:var(--lochmara); color:var(--lochmara); }
+
+    .big-result { text-align:center; padding:1.5rem; background:var(--lochmara-bg); border:1px solid var(--border-dark); border-radius:4px; margin-bottom:1.4rem; }
+    .big-result .from-val { font-size:1rem; color:var(--text-muted); margin-bottom:0.3rem; }
+    .big-result .to-val { font-size:2rem; font-weight:bold; color:var(--prussian); line-height:1.2; }
+    .big-result .to-unit { font-size:1rem; color:var(--text-muted); margin-top:0.2rem; }
+
+    .steps-section { display:none; }
+    .steps-section.visible { display:block; }
+    .step-row { display:flex; align-items:baseline; gap:0.6rem; padding:0.45rem 0; border-bottom:1px solid var(--border); font-size:0.9rem; }
+    .step-row:last-child { border-bottom:none; }
+    .step-num { font-size:0.72rem; letter-spacing:0.08em; color:var(--text-dim); width:22px; flex-shrink:0; }
+    .step-eq { font-style:italic; color:var(--prussian); flex:1; }
+    .step-result { font-weight:bold; color:var(--prussian); white-space:nowrap; }
+
+    .cheme-note { margin-top:1rem; background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:3px; padding:0.65rem 1rem; font-size:0.82rem; color:var(--amber); font-style:italic; display:none; }
+    .cheme-note.visible { display:block; }
+
+    .common-chips { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.8rem; }
+    .chip { padding:0.25rem 0.7rem; border:1px solid var(--border); border-radius:3px; font-size:0.8rem; color:var(--text-muted); background:var(--white); cursor:pointer; transition:border-color 0.15s; }
+    .chip:hover { border-color:var(--lochmara); color:var(--prussian); }
+
+    @media(max-width:700px) { .row{flex-direction:column;gap:0.8rem;} .nav-links a{padding:0 0.5rem;font-size:0.8rem;} .tool-header h1{font-size:1.5rem;} .converter-grid{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">ChemE<span> Desk</span></a>
+    <ul class="nav-links">
+      <li><a href="unit-converter.html" class="active">Unit Converter</a></li>
+      <li><a href="interpolation.html">Interpolation</a></li>
+      <li><a href="solver.html">Thermo Solver</a></li>
+      <li><a href="index.html#top" class="nav-cta">Get early access</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="tool-header">
+  <div class="tool-header-inner">
+    <div class="breadcrumb"><a href="index.html">ChemE Desk</a> / Unit Converter</div>
+    <span class="tier-tag tier-free">Free — no account needed</span>
+    <h1>Unit Converter</h1>
+    <p>8 ChemE-specific categories. Every conversion shows its full chain of reasoning.</p>
+  </div>
+</div>
+
+<div class="tool-body">
+  <div class="category-pills" id="category-pills"></div>
+
+  <div class="card">
+    <label>Common conversions</label>
+    <div class="common-chips" id="common-chips"></div>
+    <div style="height:1.4rem;"></div>
+
+    <div class="converter-grid">
+      <div>
+        <label for="from-unit">From</label>
+        <select id="from-unit"></select>
+      </div>
+      <button class="swap-btn" onclick="swapUnits()" title="Swap">&#8646;</button>
+      <div>
+        <label for="to-unit">To</label>
+        <select id="to-unit"></select>
+      </div>
+    </div>
+
+    <div class="row" style="margin-bottom:1.2rem;">
+      <div style="flex:2;">
+        <label for="input-val">Value</label>
+        <input type="number" id="input-val" placeholder="Enter value" oninput="convert()" />
+      </div>
+      <div style="flex:0 0 auto;">
+        <button class="btn-primary" onclick="convert()">Convert</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="big-result" id="big-result" style="display:none;">
+    <div class="from-val" id="result-from"></div>
+    <div class="to-val" id="result-to"></div>
+    <div class="to-unit" id="result-unit"></div>
+  </div>
+
+  <div class="card steps-section" id="steps-section">
+    <label>Step-by-step</label>
+    <div id="steps-output"></div>
+    <div class="cheme-note" id="cheme-note"></div>
+  </div>
+</div>
+
+<footer class="tool-footer">
+  <p><a href="index.html">ChemE Desk</a> &nbsp;&middot;&nbsp; Built by a chemical engineering student, for chemical engineering students.</p>
+</footer>
+
+<script>
+const CATEGORIES = {
+  Temperature:{units:['°C','°F','K','°R'],type:'temperature',common:[['°C','K'],['°F','°C'],['°F','K'],['K','°R']],note:null},
+  Pressure:{units:['Pa','kPa','MPa','bar','atm','psi','mmHg','inHg'],type:'factor',base:'Pa',factors:{Pa:1,kPa:1e3,MPa:1e6,bar:1e5,atm:101325,psi:6894.757,mmHg:133.322,inHg:3386.39},common:[['atm','Pa'],['bar','psi'],['MPa','bar'],['kPa','atm']],note:'These are absolute pressure conversions. If your problem uses gauge pressure (psig, barg), add atmospheric pressure (1 atm ≈ 101.325 kPa) before converting.'},
+  Energy:{units:['J','kJ','MJ','cal','kcal','BTU','kWh'],type:'factor',base:'J',factors:{J:1,kJ:1e3,MJ:1e6,cal:4.184,kcal:4184,BTU:1055.06,kWh:3.6e6},common:[['kJ','BTU'],['kcal','kJ'],['BTU','J'],['kWh','MJ']],note:null},
+  Power:{units:['W','kW','MW','BTU/hr','hp'],type:'factor',base:'W',factors:{W:1,kW:1e3,MW:1e6,'BTU/hr':0.293071,hp:745.7},common:[['kW','BTU/hr'],['hp','kW'],['MW','kW']],note:null},
+  'Mass Flow':{units:['kg/s','kg/hr','g/s','lb/s','lb/hr','ton/hr'],type:'factor',base:'kg/s',factors:{'kg/s':1,'kg/hr':1/3600,'g/s':0.001,'lb/s':0.453592,'lb/hr':0.453592/3600,'ton/hr':1000/3600},common:[['kg/hr','lb/hr'],['kg/s','kg/hr'],['lb/hr','kg/hr']],note:'ton/hr refers to metric tonnes (1000 kg). US short tons (2000 lb) differ — verify your source.'},
+  Volume:{units:['m³','L','mL','cm³','ft³','gal (US)','bbl (oil)'],type:'factor',base:'m³',factors:{'m³':1,'L':0.001,'mL':1e-6,'cm³':1e-6,'ft³':0.0283168,'gal (US)':0.00378541,'bbl (oil)':0.158987},common:[['L','gal (US)'],['m³','ft³'],['bbl (oil)','L'],['ft³','L']],note:null},
+  'Specific Energy':{units:['kJ/kg','BTU/lb','cal/g','J/g','kcal/kg'],type:'factor',base:'kJ/kg',factors:{'kJ/kg':1,'BTU/lb':2.326,'cal/g':4.184,'J/g':1,'kcal/kg':4.184},common:[['kJ/kg','BTU/lb'],['BTU/lb','kJ/kg'],['cal/g','kJ/kg']],note:null},
+  Viscosity:{units:['Pa·s','mPa·s','cP','lb/(ft·s)','lb/(ft·hr)'],type:'factor',base:'Pa·s',factors:{'Pa·s':1,'mPa·s':0.001,'cP':0.001,'lb/(ft·s)':1.48816,'lb/(ft·hr)':0.000413378},common:[['cP','Pa·s'],['mPa·s','cP'],['cP','lb/(ft·s)']],note:'mPa·s = cP numerically. Used in Reynolds number calculations — ensure consistent units throughout.'}
+};
+
+let currentCategory='Temperature';
+
+function init(){
+  const el=document.getElementById('category-pills');
+  Object.keys(CATEGORIES).forEach(cat=>{
+    const btn=document.createElement('button');
+    btn.className='pill'+(cat===currentCategory?' active':'');
+    btn.textContent=cat;btn.onclick=()=>selectCategory(cat);el.appendChild(btn);
+  });
+  selectCategory(currentCategory);
+}
+
+function selectCategory(cat){
+  currentCategory=cat;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active',p.textContent===cat));
+  const data=CATEGORIES[cat];
+  const from=document.getElementById('from-unit'),to=document.getElementById('to-unit');
+  from.innerHTML='';to.innerHTML='';
+  data.units.forEach(u=>{from.add(new Option(u,u));to.add(new Option(u,u));});
+  const defaults={Temperature:['°F','°C'],Pressure:['atm','Pa'],Energy:['BTU','kJ'],Power:['hp','kW'],'Mass Flow':['lb/hr','kg/hr'],Volume:['gal (US)','L'],'Specific Energy':['BTU/lb','kJ/kg'],Viscosity:['cP','Pa·s']};
+  const[df,dt]=defaults[cat]||[data.units[0],data.units[1]];
+  from.value=df;to.value=dt;
+  const chips=document.getElementById('common-chips');chips.innerHTML='';
+  data.common.forEach(([f,t])=>{const c=document.createElement('button');c.className='chip';c.textContent=`${f} → ${t}`;c.onclick=()=>{from.value=f;to.value=t;convert();};chips.appendChild(c);});
+  clearResult();
+}
+
+function toBase(v,u,d){
+  if(d.type==='temperature'){
+    if(u==='°C')return v;if(u==='°F')return(v-32)*5/9;if(u==='K')return v-273.15;if(u==='°R')return(v-491.67)*5/9;
+  }return v*d.factors[u];
+}
+function fromBase(b,u,d){
+  if(d.type==='temperature'){
+    if(u==='°C')return b;if(u==='°F')return b*9/5+32;if(u==='K')return b+273.15;if(u==='°R')return(b+273.15)*9/5;
+  }return b/d.factors[u];
+}
+function fmt(n){
+  if(Math.abs(n)>=1e6||(Math.abs(n)<0.001&&n!==0))return n.toExponential(5);
+  return parseFloat(n.toFixed(Math.abs(n)>=100?3:Math.abs(n)>=1?5:6)).toString();
+}
+
+function convert(){
+  const v=parseFloat(document.getElementById('input-val').value);
+  const fu=document.getElementById('from-unit').value,tu=document.getElementById('to-unit').value;
+  const data=CATEGORIES[currentCategory];
+  if(isNaN(v)){clearResult();return;}
+  const result=fromBase(toBase(v,fu,data),tu,data);
+
+  document.getElementById('big-result').style.display='block';
+  document.getElementById('result-from').textContent=`${fmt(v)} ${fu}  =`;
+  document.getElementById('result-to').textContent=fmt(result);
+  document.getElementById('result-unit').textContent=tu;
+
+  // Steps
+  const steps=[];
+  if(data.type==='temperature'){
+    if(fu!==tu){
+      if(fu!=='°C'){const map={'°F':`(${v} − 32) × 5/9`,'K':`${v} − 273.15`,'°R':`(${v} − 491.67) × 5/9`};const c=toBase(v,fu,data);steps.push({n:1,eq:`Convert ${fu} → °C: ${map[fu]}`,res:`${fmt(c)} °C`});if(tu!=='°C'){const m2={'°F':`${fmt(c)} × 9/5 + 32`,'K':`${fmt(c)} + 273.15`,'°R':`(${fmt(c)} + 273.15) × 9/5`};steps.push({n:2,eq:`Convert °C → ${tu}: ${m2[tu]}`,res:`${fmt(result)} ${tu}`});}}
+      else{const m={'°F':`${v} × 9/5 + 32`,'K':`${v} + 273.15`,'°R':`(${v} + 273.15) × 9/5`};steps.push({n:1,eq:`Convert °C → ${tu}: ${m[tu]}`,res:`${fmt(result)} ${tu}`});}
+    }else{steps.push({n:1,eq:`${v} ${fu}`,res:`${fmt(result)} ${tu}`});}
+  }else{
+    const ff=data.factors[fu],tf=data.factors[tu],base=v*ff;
+    if(fu!==data.base){steps.push({n:1,eq:`${v} ${fu} × ${ff} ${data.base}/${fu}`,res:`${fmt(base)} ${data.base}`});steps.push({n:2,eq:`${fmt(base)} ${data.base} ÷ ${tf} ${data.base}/${tu}`,res:`${fmt(result)} ${tu}`});}
+    else{steps.push({n:1,eq:`${v} ${fu} ÷ ${tf} ${data.base}/${tu}`,res:`${fmt(result)} ${tu}`});}
+  }
+  const out=document.getElementById('steps-output');out.innerHTML='';
+  steps.forEach(s=>{const r=document.createElement('div');r.className='step-row';r.innerHTML=`<span class="step-num">${s.n}.</span><span class="step-eq">${s.eq}</span><span class="step-result">= ${s.res}</span>`;out.appendChild(r);});
+  document.getElementById('steps-section').classList.add('visible');
+  const note=document.getElementById('cheme-note');
+  if(data.note){note.textContent=data.note;note.classList.add('visible');}else{note.classList.remove('visible');}
+}
+
+function swapUnits(){const f=document.getElementById('from-unit'),t=document.getElementById('to-unit'),tmp=f.value;f.value=t.value;t.value=tmp;convert();}
+function clearResult(){document.getElementById('big-result').style.display='none';document.getElementById('steps-section').classList.remove('visible');}
+document.getElementById('from-unit').onchange=convert;
+document.getElementById('to-unit').onchange=convert;
+init();
+</script>
+</body>
+</html>

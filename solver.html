@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thermo Solver — ChemE Desk</title>
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --prussian:#00304C; --lochmara:#008BC0; --lochmara-d:#006fa3;
+      --lochmara-l:#1aa3d9; --lochmara-bg:#e8f6fc; --white:#ffffff;
+      --off-white:#f7fbfd; --border:#c8e4f0; --border-dark:#a0cfe4;
+      --text:#0d2d3f; --text-muted:#3a6880; --text-dim:#7aafc8;
+      --amber:#b06d00; --amber-bg:#fef8ec; --amber-border:#f0d080;
+      --green:#1a7a4a; --green-bg:#eaf6f0;
+      --font:'Times New Roman',Times,serif;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--white); color:var(--text); font-size:16px; line-height:1.65; }
+
+    /* NAV */
+    nav { background:var(--prussian); border-bottom:3px solid var(--lochmara); position:sticky; top:0; z-index:100; }
+    .nav-inner { max-width:1140px; margin:0 auto; padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:58px; gap:1rem; }
+    .nav-logo { font-size:1.15rem; font-weight:bold; color:var(--white); text-decoration:none; white-space:nowrap; flex-shrink:0; }
+    .nav-logo span { color:var(--lochmara-l); }
+    .nav-links { display:flex; list-style:none; align-items:center; }
+    .nav-links a { color:rgba(255,255,255,0.58); text-decoration:none; font-size:0.88rem; padding:0 0.9rem; height:58px; display:flex; align-items:center; border-bottom:2px solid transparent; margin-bottom:-3px; white-space:nowrap; transition:color 0.15s,border-color 0.15s; }
+    .nav-links a:hover { color:var(--white); }
+    .nav-links a.active { color:var(--white); border-bottom-color:var(--lochmara-l); }
+    .nav-cta { background:var(--lochmara) !important; color:var(--white) !important; padding:0.38rem 1rem !important; border-radius:3px; height:auto !important; border-bottom:none !important; margin:0 !important; font-size:0.85rem !important; }
+    .nav-cta:hover { background:var(--lochmara-d) !important; }
+
+    /* TOOL HEADER */
+    .tool-header { background:var(--prussian); padding:2.8rem 2rem 2.4rem; }
+    .tool-header-inner { max-width:1140px; margin:0 auto; }
+    .breadcrumb { font-size:0.78rem; color:rgba(255,255,255,0.38); margin-bottom:0.6rem; }
+    .breadcrumb a { color:var(--lochmara-l); text-decoration:none; }
+    .tool-header h1 { font-size:1.85rem; color:var(--white); font-weight:bold; margin-bottom:0.35rem; }
+    .tool-header p { color:rgba(255,255,255,0.52); font-size:0.93rem; font-style:italic; }
+    .tier-tag { display:inline-block; font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; padding:0.2rem 0.6rem; border-radius:2px; margin-bottom:0.8rem; background:var(--amber-bg); color:var(--amber); }
+
+    /* BODY */
+    .tool-body { max-width:1140px; margin:0 auto; padding:2.5rem 2rem; }
+    label { display:block; font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.4rem; }
+    input[type="text"], input[type="number"], select, textarea { width:100%; font-family:var(--font); font-size:0.95rem; color:var(--text); background:var(--white); border:1px solid var(--border-dark); border-radius:3px; padding:0.6rem 0.85rem; outline:none; transition:border-color 0.15s; }
+    input:focus, textarea:focus { border-color:var(--lochmara); }
+    textarea { resize:vertical; line-height:1.55; }
+    .btn-primary { background:var(--lochmara); color:var(--white); border:none; padding:0.7rem 1.7rem; font-family:var(--font); font-size:0.95rem; cursor:pointer; border-radius:3px; transition:background 0.15s; }
+    .btn-primary:hover { background:var(--lochmara-d); }
+    .btn-primary:disabled { background:var(--border-dark); cursor:not-allowed; }
+    .btn-secondary { background:var(--off-white); color:var(--prussian); border:1px solid var(--border-dark); padding:0.7rem 1.4rem; font-family:var(--font); font-size:0.95rem; cursor:pointer; border-radius:3px; text-decoration:none; display:inline-block; transition:border-color 0.15s; }
+    .btn-secondary:hover { border-color:var(--lochmara); }
+    .card { background:var(--off-white); border:1px solid var(--border); border-radius:4px; padding:1.6rem; margin-bottom:1.2rem; }
+    .disclaimer { background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:3px; padding:0.65rem 1rem; font-size:0.8rem; color:var(--amber); font-style:italic; margin-top:1rem; }
+
+    /* TOOL-SPECIFIC */
+    .usage-bar-wrap { background:var(--off-white); border:1px solid var(--border); border-radius:3px; padding:0.8rem 1.1rem; margin-bottom:1.4rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+    .usage-label { font-size:0.85rem; color:var(--text-muted); white-space:nowrap; }
+    .usage-track { flex:1; min-width:120px; height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
+    .usage-fill { height:100%; background:var(--lochmara); border-radius:3px; transition:width 0.3s; }
+    .usage-fill.warn { background:var(--amber); }
+    .usage-reset { font-size:0.78rem; color:var(--text-dim); font-style:italic; white-space:nowrap; }
+
+    .mode-toggle { display:flex; border:1px solid var(--border-dark); border-radius:3px; overflow:hidden; width:fit-content; margin-bottom:0.6rem; }
+    .mode-btn { padding:0.5rem 1.2rem; font-family:var(--font); font-size:0.88rem; border:none; background:var(--white); color:var(--text-muted); cursor:pointer; transition:background 0.15s,color 0.15s; }
+    .mode-btn:first-child { border-right:1px solid var(--border-dark); }
+    .mode-btn.active { background:var(--prussian); color:var(--white); }
+    .mode-desc { font-size:0.83rem; color:var(--text-muted); font-style:italic; margin-bottom:1.2rem; padding:0.6rem 0.9rem; background:var(--off-white); border-radius:3px; border-left:3px solid var(--border-dark); }
+
+    .topic-chips { display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:1rem; }
+    .topic-chip { padding:0.3rem 0.85rem; border:1px solid var(--border); border-radius:20px; font-family:var(--font); font-size:0.82rem; color:var(--text-muted); background:var(--white); cursor:pointer; transition:all 0.15s; }
+    .topic-chip.active { background:var(--lochmara); border-color:var(--lochmara); color:var(--white); }
+    .topic-chip:hover:not(.active) { border-color:var(--lochmara); color:var(--prussian); }
+
+    .example-btn { display:block; width:100%; text-align:left; background:var(--off-white); border:1px solid var(--border); border-radius:3px; padding:0.6rem 0.9rem; font-family:var(--font); font-size:0.85rem; color:var(--text-muted); cursor:pointer; margin-bottom:0.5rem; transition:border-color 0.15s,color 0.15s; }
+    .example-btn:hover { border-color:var(--lochmara); color:var(--prussian); }
+
+    .solve-btn-row { display:flex; gap:0.8rem; align-items:center; margin-top:1rem; }
+    .loading { display:none; align-items:center; gap:0.6rem; font-size:0.88rem; color:var(--text-muted); font-style:italic; }
+    .loading.visible { display:flex; }
+    .spinner { width:16px; height:16px; border:2px solid var(--border); border-top-color:var(--lochmara); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .response-area { margin-top:1.4rem; display:none; }
+    .response-area.visible { display:block; }
+    .chat-bubble { margin-bottom:1rem; padding:1rem 1.2rem; border-radius:3px; font-size:0.9rem; line-height:1.7; }
+    .chat-bubble.user { background:var(--lochmara-bg); border:1px solid var(--border-dark); color:var(--prussian); }
+    .chat-bubble.assistant { background:var(--off-white); border:1px solid var(--border); border-left:3px solid var(--lochmara); color:var(--text); white-space:pre-wrap; }
+    .bubble-label { font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.4rem; }
+
+    .followup-area { margin-top:1.2rem; display:none; }
+    .followup-area.visible { display:block; }
+    .followup-row { display:flex; gap:0.7rem; }
+    .stuck-btn { background:var(--amber-bg); border:1px solid var(--amber-border); color:var(--amber); padding:0.55rem 1rem; font-family:var(--font); font-size:0.85rem; border-radius:3px; cursor:pointer; }
+    .stuck-btn:hover { background:#fef0c0; }
+
+    .paywall-card { background:var(--lochmara-bg); border:1px solid var(--border-dark); border-radius:4px; padding:2rem; text-align:center; margin-top:1.4rem; display:none; }
+    .paywall-card h3 { color:var(--prussian); font-size:1.1rem; margin-bottom:0.4rem; }
+    .paywall-card p { color:var(--text-muted); font-size:0.9rem; font-style:italic; margin-bottom:1.2rem; }
+    .paywall-actions { display:flex; gap:0.8rem; justify-content:center; flex-wrap:wrap; }
+
+    .tool-footer { background:var(--prussian); padding:1.5rem 2rem; text-align:center; margin-top:4rem; }
+    .tool-footer p { font-size:0.82rem; color:rgba(255,255,255,0.35); }
+    .tool-footer a { color:var(--lochmara-l); text-decoration:none; }
+
+    @media(max-width:700px) { .followup-row{flex-direction:column;} .nav-links a{padding:0 0.5rem;font-size:0.8rem;} }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">ChemE<span> Desk</span></a>
+    <ul class="nav-links">
+      <li><a href="unit-converter.html">Unit Converter</a></li>
+      <li><a href="interpolation.html">Interpolation</a></li>
+      <li><a href="solver.html" class="active">Thermo Solver</a></li>
+      <li><a href="index.html#top" class="nav-cta">Get early access</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="tool-header">
+  <div class="tool-header-inner">
+    <div class="breadcrumb"><a href="index.html">ChemE Desk</a> / Thermo Solver</div>
+    <span class="tier-tag">Free account — 5 uses per 2 months</span>
+    <h1>Thermodynamics Solver</h1>
+    <p>Paste a problem. Get a full step-by-step solution — or choose Tutor mode to be guided through it.</p>
+  </div>
+</div>
+
+<div class="tool-body">
+
+  <div class="usage-bar-wrap" id="usage-bar-wrap">
+    <span class="usage-label" id="usage-label">Loading...</span>
+    <div class="usage-track"><div class="usage-fill" id="usage-fill" style="width:0%"></div></div>
+    <span class="usage-reset" id="usage-reset"></span>
+  </div>
+
+  <div class="card">
+    <label>Mode</label>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btn-solve" onclick="setMode('solve')">Solve it</button>
+      <button class="mode-btn" id="btn-tutor" onclick="setMode('tutor')">Tutor me</button>
+    </div>
+    <div class="mode-desc" id="mode-desc"><strong>Solve it:</strong> Paste your problem and get a complete, step-by-step solution with all work shown.</div>
+
+    <label>Topic</label>
+    <div class="topic-chips">
+      <button class="topic-chip active" onclick="setTopic('General Thermodynamics',this)">General</button>
+      <button class="topic-chip" onclick="setTopic('Energy Balances',this)">Energy Balances</button>
+      <button class="topic-chip" onclick="setTopic('Entropy & Second Law',this)">Entropy</button>
+      <button class="topic-chip" onclick="setTopic('Phase Equilibrium',this)">Phase Equilibrium</button>
+      <button class="topic-chip" onclick="setTopic('Power Cycles',this)">Power Cycles</button>
+      <button class="topic-chip" onclick="setTopic('Refrigeration & Heat Pumps',this)">Refrigeration</button>
+      <button class="topic-chip" onclick="setTopic('Equations of State',this)">Equations of State</button>
+      <button class="topic-chip" onclick="setTopic('Ideal Gas Law',this)">Ideal Gas</button>
+    </div>
+
+    <label>Example problems</label>
+    <button class="example-btn" onclick="loadEx(0)">Energy balance: Steam enters a turbine at 3 MPa, 400°C (h = 3230.9 kJ/kg) and exits at 0.1 MPa (h = 2675.5 kJ/kg). Mass flow 5 kg/s, adiabatic. Find power output.</button>
+    <button class="example-btn" onclick="loadEx(1)">Carnot: Heat engine between 800 K and 300 K, Q_H = 500 kJ/cycle. Find thermal efficiency and net work output.</button>
+    <button class="example-btn" onclick="loadEx(2)">Entropy: 2 kg of air (Cp = 1.005 kJ/kg·K) heated at constant pressure from 300 K to 500 K. Find the entropy change.</button>
+
+    <label for="problem-input" style="margin-top:1rem;">Your problem</label>
+    <textarea id="problem-input" rows="6" placeholder="Paste or type your thermodynamics problem here. Include all given values and units."></textarea>
+
+    <div class="solve-btn-row">
+      <button class="btn-primary" id="solve-btn" onclick="submitProblem()">Solve</button>
+      <div class="loading" id="loading-indicator">
+        <div class="spinner"></div>
+        <span id="loading-text">Solving...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="response-area" id="response-area">
+    <div id="conversation-history"></div>
+    <div class="followup-area" id="followup-area">
+      <div class="followup-row">
+        <input type="text" id="followup-input" placeholder="Ask a follow-up or show your work..." />
+        <button class="btn-primary" onclick="sendFollowup()">Send</button>
+        <button class="stuck-btn" id="stuck-btn" onclick="sendStuck()" style="display:none;">I'm stuck</button>
+      </div>
+    </div>
+    <div class="disclaimer">If this problem uses steam table or thermodynamic property values, those may be approximated. Always verify against your textbook before submitting coursework.</div>
+  </div>
+
+  <div class="paywall-card" id="paywall-card">
+    <h3>You have used all 5 solves for this period</h3>
+    <p>Your count resets <span id="paywall-reset"></span>. Get early access for unlimited solves.</p>
+    <div class="paywall-actions">
+      <a href="index.html#top" class="btn-primary">Get early access</a>
+      <a href="index.html#pricing" class="btn-secondary">See plans</a>
+    </div>
+  </div>
+
+</div>
+
+<footer class="tool-footer">
+  <p><a href="index.html">ChemE Desk</a> &nbsp;&middot;&nbsp; Built by a chemical engineering student, for chemical engineering students.</p>
+</footer>
+
+<script>
+const LIMIT=5, PERIOD=2*30*24*60*60*1000, KEY='chemedesk_solver_v1';
+
+function getUsage(){
+  try{const s=localStorage.getItem(KEY);if(!s)return{count:0,start:Date.now()};const u=JSON.parse(s);if(Date.now()-u.start>PERIOD)return{count:0,start:Date.now()};return u;}
+  catch{return{count:0,start:Date.now()};}
+}
+function saveUsage(u){try{localStorage.setItem(KEY,JSON.stringify(u));}catch{}}
+function incrementUsage(){const u=getUsage();u.count+=1;saveUsage(u);return u;}
+function canUse(){return getUsage().count<LIMIT;}
+function resetDate(s){return new Date(s+PERIOD).toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+
+function updateUsageUI(){
+  const u=getUsage(),pct=Math.min(100,(u.count/LIMIT)*100);
+  const fill=document.getElementById('usage-fill');
+  document.getElementById('usage-label').textContent=`${u.count} of ${LIMIT} solves used`;
+  fill.style.width=pct+'%';
+  fill.classList.toggle('warn',u.count>=LIMIT-1);
+  document.getElementById('usage-reset').textContent=`resets ${resetDate(u.start)}`;
+  if(!canUse()){
+    document.getElementById('solve-btn').disabled=true;
+    document.getElementById('paywall-reset').textContent=resetDate(u.start);
+    document.getElementById('paywall-card').style.display='block';
+  }
+}
+
+let currentMode='solve', currentTopic='General Thermodynamics', messages=[];
+
+const MODE_DESC={
+  solve:'<strong>Solve it:</strong> Get a complete, step-by-step solution with all work shown.',
+  tutor:'<strong>Tutor me:</strong> Instead of giving the answer, the solver asks guiding questions and gives hints. Use "I\'m stuck" for a bigger nudge.'
+};
+
+function setMode(m){
+  currentMode=m;
+  document.getElementById('btn-solve').classList.toggle('active',m==='solve');
+  document.getElementById('btn-tutor').classList.toggle('active',m==='tutor');
+  document.getElementById('mode-desc').innerHTML=MODE_DESC[m];
+  document.getElementById('stuck-btn').style.display=m==='tutor'?'block':'none';
+}
+
+function setTopic(t,btn){
+  currentTopic=t;
+  document.querySelectorAll('.topic-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+const EXAMPLES=[
+  'Steam enters a turbine at 3 MPa and 400°C with an enthalpy of 3230.9 kJ/kg and exits at 0.1 MPa with an enthalpy of 2675.5 kJ/kg. The mass flow rate is 5 kg/s. Assume steady-state, adiabatic operation. Find the power output of the turbine.',
+  'A Carnot heat engine operates between a high-temperature reservoir at 800 K and a low-temperature reservoir at 300 K. The engine absorbs 500 kJ of heat from the hot reservoir per cycle. Find (a) the thermal efficiency and (b) the net work output per cycle.',
+  '2 kg of air is heated at constant pressure from 300 K to 500 K. Assume air is an ideal gas with Cp = 1.005 kJ/(kg·K). Find the change in entropy of the air.'
+];
+
+function loadEx(i){document.getElementById('problem-input').value=EXAMPLES[i];}
+
+async function callAPI(msg){
+  messages.push({role:'user',content:msg});
+  const apiMessages=messages.map((m,i)=>i===0&&m.role==='user'&&currentTopic?{role:'user',content:`Topic: ${currentTopic}\n\n${m.content}`}:{role:m.role,content:m.content});
+  const res=await fetch('/api/solve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:currentMode,topic:currentTopic,messages:apiMessages})});
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||'Something went wrong.');}
+  const data=await res.json();
+  messages.push({role:'assistant',content:data.solution});
+  return data.solution;
+}
+
+function addBubble(role,text){
+  const hist=document.getElementById('conversation-history');
+  const div=document.createElement('div');div.className=`chat-bubble ${role}`;
+  const lbl=document.createElement('div');lbl.className='bubble-label';
+  lbl.textContent=role==='user'?'Your problem':(currentMode==='tutor'?'Tutor':'Solution');
+  div.appendChild(lbl);
+  const body=document.createElement('div');body.textContent=text;div.appendChild(body);
+  hist.appendChild(div);div.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function setLoading(on,text='Solving...'){
+  document.getElementById('loading-indicator').classList.toggle('visible',on);
+  document.getElementById('loading-text').textContent=text;
+  document.getElementById('solve-btn').disabled=on||!canUse();
+}
+
+async function submitProblem(){
+  const problem=document.getElementById('problem-input').value.trim();
+  if(!problem){alert('Please enter a problem first.');return;}
+  if(!canUse()){document.getElementById('paywall-card').style.display='block';return;}
+  messages=[];document.getElementById('conversation-history').innerHTML='';
+  incrementUsage();updateUsageUI();
+  setLoading(true,currentMode==='tutor'?'Thinking about how to guide you...':'Solving...');
+  document.getElementById('response-area').classList.add('visible');
+  try{
+    addBubble('user',problem);
+    const reply=await callAPI(problem);
+    addBubble('assistant',reply);
+    document.getElementById('followup-area').classList.add('visible');
+    if(currentMode==='tutor')document.getElementById('stuck-btn').style.display='block';
+  }catch(err){addBubble('assistant','Error: '+err.message);}
+  finally{setLoading(false);}
+}
+
+async function sendFollowup(){
+  const input=document.getElementById('followup-input'),text=input.value.trim();
+  if(!text)return;input.value='';await sendMessage(text);
+}
+async function sendStuck(){await sendMessage('I am stuck. Can you give me a bigger hint without giving the full answer?');}
+
+async function sendMessage(text){
+  setLoading(true,'Thinking...');
+  try{addBubble('user',text);const reply=await callAPI(text);addBubble('assistant',reply);}
+  catch(err){addBubble('assistant','Error: '+err.message);}
+  finally{setLoading(false);}
+}
+
+document.getElementById('followup-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendFollowup();}
+});
+
+updateUsageUI();
+</script>
+</body>
+</html>

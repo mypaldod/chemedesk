@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interpolation — ChemE Desk</title>
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --prussian:#00304C; --lochmara:#008BC0; --lochmara-d:#006fa3;
+      --lochmara-l:#1aa3d9; --lochmara-bg:#e8f6fc; --white:#ffffff;
+      --off-white:#f7fbfd; --border:#c8e4f0; --border-dark:#a0cfe4;
+      --text:#0d2d3f; --text-muted:#3a6880; --text-dim:#7aafc8;
+      --amber:#b06d00; --amber-bg:#fef8ec; --amber-border:#f0d080;
+      --green:#1a7a4a; --green-bg:#eaf6f0;
+      --font:'Times New Roman',Times,serif;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--white); color:var(--text); font-size:16px; line-height:1.65; }
+
+    /* NAV */
+    nav { background:var(--prussian); border-bottom:3px solid var(--lochmara); position:sticky; top:0; z-index:100; }
+    .nav-inner { max-width:1140px; margin:0 auto; padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:58px; gap:1rem; }
+    .nav-logo { font-size:1.15rem; font-weight:bold; color:var(--white); text-decoration:none; white-space:nowrap; flex-shrink:0; }
+    .nav-logo span { color:var(--lochmara-l); }
+    .nav-links { display:flex; list-style:none; align-items:center; }
+    .nav-links a { color:rgba(255,255,255,0.58); text-decoration:none; font-size:0.88rem; padding:0 0.9rem; height:58px; display:flex; align-items:center; border-bottom:2px solid transparent; margin-bottom:-3px; white-space:nowrap; transition:color 0.15s,border-color 0.15s; }
+    .nav-links a:hover { color:var(--white); }
+    .nav-links a.active { color:var(--white); border-bottom-color:var(--lochmara-l); }
+    .nav-cta { background:var(--lochmara) !important; color:var(--white) !important; padding:0.38rem 1rem !important; border-radius:3px; height:auto !important; border-bottom:none !important; margin:0 !important; font-size:0.85rem !important; }
+    .nav-cta:hover { background:var(--lochmara-d) !important; }
+
+    /* TOOL HEADER */
+    .tool-header { background:var(--prussian); padding:2.8rem 2rem 2.4rem; }
+    .tool-header-inner { max-width:1140px; margin:0 auto; }
+    .breadcrumb { font-size:0.78rem; color:rgba(255,255,255,0.38); margin-bottom:0.6rem; }
+    .breadcrumb a { color:var(--lochmara-l); text-decoration:none; }
+    .tool-header h1 { font-size:1.85rem; color:var(--white); font-weight:bold; margin-bottom:0.35rem; }
+    .tool-header p { color:rgba(255,255,255,0.52); font-size:0.93rem; font-style:italic; }
+    .tier-tag { display:inline-block; font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; padding:0.2rem 0.6rem; border-radius:2px; margin-bottom:0.8rem; background:var(--green-bg); color:var(--green); }
+
+    /* BODY */
+    .tool-body { max-width:1140px; margin:0 auto; padding:2.5rem 2rem; }
+    label { display:block; font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.4rem; }
+    input[type="text"], input[type="number"], select, textarea { width:100%; font-family:var(--font); font-size:0.95rem; color:var(--text); background:var(--white); border:1px solid var(--border-dark); border-radius:3px; padding:0.6rem 0.85rem; outline:none; transition:border-color 0.15s; }
+    input:focus, select:focus, textarea:focus { border-color:var(--lochmara); }
+    textarea { resize:vertical; }
+    .btn-primary { background:var(--lochmara); color:var(--white); border:none; padding:0.7rem 1.7rem; font-family:var(--font); font-size:0.95rem; cursor:pointer; border-radius:3px; transition:background 0.15s; }
+    .btn-primary:hover { background:var(--lochmara-d); }
+    .card { background:var(--off-white); border:1px solid var(--border); border-radius:4px; padding:1.6rem; margin-bottom:1.2rem; }
+    .row { display:flex; gap:1.2rem; align-items:flex-end; }
+    .row > * { flex:1; }
+
+    /* TABS */
+    .tab-nav { display:flex; border-bottom:2px solid var(--border); margin-bottom:2rem; }
+    .tab-btn { padding:0.65rem 1.4rem; font-family:var(--font); font-size:0.9rem; color:var(--text-muted); background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-2px; cursor:pointer; white-space:nowrap; transition:color 0.15s,border-color 0.15s; }
+    .tab-btn:hover { color:var(--text); }
+    .tab-btn.active { color:var(--prussian); border-bottom-color:var(--lochmara); font-weight:bold; }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    /* RESULTS */
+    .result-box { background:var(--white); border:1px solid var(--border); border-left:3px solid var(--lochmara); border-radius:0 3px 3px 0; padding:1.3rem 1.5rem; font-size:0.92rem; line-height:1.75; }
+    .result-box h4 { font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--lochmara); margin-bottom:0.4rem; margin-top:1rem; }
+    .result-box h4:first-child { margin-top:0; }
+    .result-box .answer-line { background:var(--lochmara-bg); border:1px solid var(--border-dark); padding:0.55rem 1rem; margin-top:0.7rem; border-radius:3px; font-weight:bold; color:var(--prussian); }
+    .result-box .step { margin-bottom:0.4rem; }
+    .result-box .eq { font-style:italic; }
+    .disclaimer { background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:3px; padding:0.65rem 1rem; font-size:0.8rem; color:var(--amber); font-style:italic; margin-top:1rem; }
+
+    /* TOOL-SPECIFIC */
+    .data-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+    .extrap-warning { background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:3px; padding:0.6rem 0.9rem; font-size:0.82rem; color:var(--amber); font-style:italic; margin-bottom:1rem; display:none; }
+    .extrap-warning.visible { display:block; }
+    .method-row { display:flex; gap:0.5rem; margin-bottom:1rem; }
+    .method-btn { padding:0.35rem 0.9rem; border:1px solid var(--border-dark); border-radius:3px; font-family:var(--font); font-size:0.85rem; color:var(--text-muted); background:var(--white); cursor:pointer; transition:all 0.15s; }
+    .method-btn.active { background:var(--prussian); border-color:var(--prussian); color:var(--white); }
+    .preset-desc { font-size:0.85rem; color:var(--text-muted); font-style:italic; margin-bottom:1.2rem; }
+    .bilinear-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
+    .bilinear-corner { background:var(--off-white); border:1px solid var(--border); border-radius:3px; padding:0.9rem; }
+    .bilinear-corner label { font-size:0.72rem; color:var(--text-dim); }
+    .mini-row { display:flex; gap:0.5rem; align-items:center; margin-top:0.4rem; }
+    .mini-row span { font-size:0.82rem; color:var(--text-dim); width:14px; flex-shrink:0; }
+    .bilinear-target { background:var(--lochmara-bg); border:1px solid var(--border-dark); border-radius:3px; padding:1rem; margin-top:1.2rem; }
+    .tool-footer { background:var(--prussian); padding:1.5rem 2rem; text-align:center; margin-top:4rem; }
+    .tool-footer p { font-size:0.82rem; color:rgba(255,255,255,0.35); }
+    .tool-footer a { color:var(--lochmara-l); text-decoration:none; }
+
+    @media(max-width:700px) { .row{flex-direction:column;} .data-grid{grid-template-columns:1fr;} .bilinear-grid{grid-template-columns:1fr;} .nav-links a{padding:0 0.5rem;font-size:0.8rem;} }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">ChemE<span> Desk</span></a>
+    <ul class="nav-links">
+      <li><a href="unit-converter.html">Unit Converter</a></li>
+      <li><a href="interpolation.html" class="active">Interpolation</a></li>
+      <li><a href="solver.html">Thermo Solver</a></li>
+      <li><a href="index.html#top" class="nav-cta">Get early access</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="tool-header">
+  <div class="tool-header-inner">
+    <div class="breadcrumb"><a href="index.html">ChemE Desk</a> / Interpolation</div>
+    <span class="tier-tag">Free — no account needed</span>
+    <h1>Interpolation &amp; Extrapolation</h1>
+    <p>Linear and cubic spline interpolation with full work shown. Includes bilinear for 2D thermodynamic tables.</p>
+  </div>
+</div>
+
+<div class="tool-body">
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('custom',this)">Custom Data</button>
+    <button class="tab-btn" onclick="switchTab('preset',this)">Preset Tables</button>
+    <button class="tab-btn" onclick="switchTab('bilinear',this)">Bilinear (2D)</button>
+  </div>
+
+  <!-- CUSTOM -->
+  <div class="tab-panel active" id="tab-custom">
+    <div class="card">
+      <div class="data-grid">
+        <div>
+          <label for="custom-data">Data points (one per line: x, y)</label>
+          <textarea id="custom-data" rows="8" placeholder="0, 0.00089&#10;20, 0.00101&#10;40, 0.00065&#10;60, 0.00047&#10;80, 0.00036&#10;100, 0.00028"></textarea>
+        </div>
+        <div>
+          <label>Interpolation method</label>
+          <div class="method-row">
+            <button class="method-btn active" id="method-linear" onclick="setMethod('linear')">Linear</button>
+            <button class="method-btn" id="method-cubic" onclick="setMethod('cubic')">Cubic spline</button>
+          </div>
+          <label for="custom-query" style="margin-top:0.8rem;">Find y at x =</label>
+          <input type="number" id="custom-query" placeholder="e.g. 50" />
+          <div style="margin-top:1rem;">
+            <button class="btn-primary" onclick="runCustom()">Interpolate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="extrap-warning" id="custom-extrap-warn">This query falls outside the data range — this is extrapolation, not interpolation. Results may be unreliable. Verify against your data source.</div>
+    <div class="card" id="custom-result" style="display:none;">
+      <label>Result</label>
+      <div class="result-box" id="custom-result-box"></div>
+    </div>
+  </div>
+
+  <!-- PRESET -->
+  <div class="tab-panel" id="tab-preset">
+    <div class="card">
+      <div class="row">
+        <div>
+          <label for="preset-table">Table</label>
+          <select id="preset-table" onchange="loadPreset()">
+            <option value="steam_sat_T">Saturated steam — T (°C) vs h_fg (kJ/kg)</option>
+            <option value="air_cp">Air — T (K) vs Cp (kJ/kg·K)</option>
+            <option value="water_visc">Water — T (°C) vs μ (mPa·s)</option>
+            <option value="steam_sat_P">Saturated steam — P (kPa) vs T_sat (°C)</option>
+          </select>
+        </div>
+        <div>
+          <label for="preset-query" id="preset-query-label">Interpolate at T (°C) =</label>
+          <input type="number" id="preset-query" placeholder="e.g. 75" />
+        </div>
+        <div style="flex:0 0 auto;">
+          <button class="btn-primary" onclick="runPreset()" style="margin-top:1.4rem;">Interpolate</button>
+        </div>
+      </div>
+      <p class="preset-desc" id="preset-desc"></p>
+    </div>
+    <div class="extrap-warning" id="preset-extrap-warn">Outside the table range — extrapolation. Treat with caution.</div>
+    <div class="card" id="preset-result" style="display:none;">
+      <label>Result</label>
+      <div class="result-box" id="preset-result-box"></div>
+      <div class="disclaimer">These values are from a built-in reference table, not your textbook. Always verify against your course materials.</div>
+    </div>
+  </div>
+
+  <!-- BILINEAR -->
+  <div class="tab-panel" id="tab-bilinear">
+    <div class="card">
+      <p style="font-size:0.9rem;color:var(--text-muted);font-style:italic;margin-bottom:1.2rem;">Enter four surrounding table values. Common use: superheated steam tables where you need to interpolate on both temperature and pressure.</p>
+      <label style="margin-bottom:0.8rem;">Axis labels (optional)</label>
+      <div class="row" style="margin-bottom:1.4rem;">
+        <div><label for="ax-label">X-axis label</label><input type="text" id="ax-label" value="T (°C)" /></div>
+        <div><label for="ay-label">Y-axis label</label><input type="text" id="ay-label" value="P (MPa)" /></div>
+        <div><label for="az-label">Output label</label><input type="text" id="az-label" value="h (kJ/kg)" /></div>
+      </div>
+      <label style="margin-bottom:0.8rem;">Four corner values</label>
+      <div class="bilinear-grid">
+        <div class="bilinear-corner">
+          <label>Bottom-left (x₁, y₁)</label>
+          <div class="mini-row"><span>x₁</span><input type="number" id="x1" placeholder="e.g. 300" /></div>
+          <div class="mini-row"><span>y₁</span><input type="number" id="y1" placeholder="e.g. 1" /></div>
+          <div class="mini-row"><span>z₁</span><input type="number" id="z11" placeholder="f(x₁,y₁)" /></div>
+        </div>
+        <div class="bilinear-corner">
+          <label>Bottom-right (x₂, y₁)</label>
+          <div class="mini-row"><span>x₂</span><input type="number" id="x2" placeholder="e.g. 400" /></div>
+          <div class="mini-row"><span>y₁</span><input type="number" id="y1b" placeholder="same y₁" /></div>
+          <div class="mini-row"><span>z₂</span><input type="number" id="z21" placeholder="f(x₂,y₁)" /></div>
+        </div>
+        <div class="bilinear-corner">
+          <label>Top-left (x₁, y₂)</label>
+          <div class="mini-row"><span>x₁</span><input type="number" id="x1b" placeholder="same x₁" /></div>
+          <div class="mini-row"><span>y₂</span><input type="number" id="y2" placeholder="e.g. 5" /></div>
+          <div class="mini-row"><span>z₃</span><input type="number" id="z12" placeholder="f(x₁,y₂)" /></div>
+        </div>
+        <div class="bilinear-corner">
+          <label>Top-right (x₂, y₂)</label>
+          <div class="mini-row"><span>x₂</span><input type="number" id="x2b" placeholder="same x₂" /></div>
+          <div class="mini-row"><span>y₂</span><input type="number" id="y2b" placeholder="same y₂" /></div>
+          <div class="mini-row"><span>z₄</span><input type="number" id="z22" placeholder="f(x₂,y₂)" /></div>
+        </div>
+      </div>
+      <div class="bilinear-target">
+        <label>Target point</label>
+        <div class="row">
+          <div><label for="xt">x*</label><input type="number" id="xt" placeholder="e.g. 350" /></div>
+          <div><label for="yt">y*</label><input type="number" id="yt" placeholder="e.g. 3" /></div>
+          <div style="flex:0 0 auto;"><button class="btn-primary" onclick="runBilinear()" style="margin-top:1.4rem;">Interpolate</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="bilinear-result" style="display:none;">
+      <label>Step-by-step bilinear interpolation</label>
+      <div class="result-box" id="bilinear-result-box"></div>
+      <div class="disclaimer">Always verify thermodynamic table values against your textbook.</div>
+    </div>
+  </div>
+</div>
+
+<footer class="tool-footer">
+  <p><a href="index.html">ChemE Desk</a> &nbsp;&middot;&nbsp; Built by a chemical engineering student, for chemical engineering students.</p>
+</footer>
+
+<script>
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active');
+}
+let customMethod='linear';
+function setMethod(m){customMethod=m;document.getElementById('method-linear').classList.toggle('active',m==='linear');document.getElementById('method-cubic').classList.toggle('active',m==='cubic');}
+function parseData(raw){const pts=[];raw.trim().split('\n').forEach(l=>{const p=l.split(/[\s,;]+/);if(p.length>=2){const x=parseFloat(p[0]),y=parseFloat(p[1]);if(!isNaN(x)&&!isNaN(y))pts.push({x,y});}});return pts.sort((a,b)=>a.x-b.x);}
+function fmt(n,d=6){if(Math.abs(n)>=1e6||(Math.abs(n)<0.0001&&n!==0))return n.toExponential(4);return parseFloat(n.toFixed(d)).toString();}
+
+function linearInterp(pts,xq){
+  let lo=null,hi=null;
+  for(let i=0;i<pts.length-1;i++){if(xq>=pts[i].x&&xq<=pts[i+1].x){lo=pts[i];hi=pts[i+1];break;}}
+  if(!lo){if(xq<pts[0].x){lo=pts[0];hi=pts[1];}else{lo=pts[pts.length-2];hi=pts[pts.length-1];}}
+  const t=(xq-lo.x)/(hi.x-lo.x),yq=lo.y+t*(hi.y-lo.y);
+  return{yq,lo,hi,t};
+}
+
+function runCustom(){
+  const raw=document.getElementById('custom-data').value;
+  const xq=parseFloat(document.getElementById('custom-query').value);
+  const pts=parseData(raw);
+  if(pts.length<2){alert('Please enter at least 2 data points.');return;}
+  if(isNaN(xq)){alert('Please enter a valid x value.');return;}
+  const isExtrap=xq<pts[0].x||xq>pts[pts.length-1].x;
+  document.getElementById('custom-extrap-warn').classList.toggle('visible',isExtrap);
+  let html='',yq;
+  if(customMethod==='linear'){
+    const r=linearInterp(pts,xq);yq=r.yq;
+    html+=`<h4>Data (sorted)</h4>`+pts.map(p=>`<div class="step">x=${fmt(p.x)}, y=${fmt(p.y)}</div>`).join('');
+    html+=`<h4>Surrounding interval</h4><div class="step">x₁=${fmt(r.lo.x)}, y₁=${fmt(r.lo.y)}</div><div class="step">x₂=${fmt(r.hi.x)}, y₂=${fmt(r.hi.y)}</div>`;
+    html+=`<h4>Linear interpolation</h4><div class="step eq">y = y₁ + (x − x₁) × (y₂ − y₁) / (x₂ − x₁)</div>`;
+    html+=`<div class="step eq">y = ${fmt(r.lo.y)} + (${fmt(xq)} − ${fmt(r.lo.x)}) × (${fmt(r.hi.y-r.lo.y)}) / (${fmt(r.hi.x-r.lo.x)})</div>`;
+  }else{
+    yq=cubicSpline(pts,xq);
+    html+=`<h4>Method</h4><div class="step">Natural cubic spline through ${pts.length} points.</div>`;
+    html+=`<h4>Data (sorted)</h4>`+pts.map(p=>`<div class="step">x=${fmt(p.x)}, y=${fmt(p.y)}</div>`).join('');
+  }
+  html+=`<div class="answer-line">y at x = ${fmt(xq)} → <strong>${fmt(yq)}</strong></div>`;
+  if(isExtrap)html+=`<div style="margin-top:0.6rem;font-size:0.82rem;color:var(--amber);font-style:italic;">Extrapolated — treat with caution.</div>`;
+  document.getElementById('custom-result-box').innerHTML=html;
+  document.getElementById('custom-result').style.display='block';
+}
+
+function cubicSpline(pts,xq){
+  const n=pts.length,h=[],alpha=[],l=[],mu=[],z=[],c=[],b=[],d=[];
+  for(let i=0;i<n-1;i++)h[i]=pts[i+1].x-pts[i].x;
+  for(let i=1;i<n-1;i++)alpha[i]=(3/h[i])*(pts[i+1].y-pts[i].y)-(3/h[i-1])*(pts[i].y-pts[i-1].y);
+  l[0]=1;mu[0]=0;z[0]=0;
+  for(let i=1;i<n-1;i++){l[i]=2*(pts[i+1].x-pts[i-1].x)-h[i-1]*mu[i-1];mu[i]=h[i]/l[i];z[i]=(alpha[i]-h[i-1]*z[i-1])/l[i];}
+  l[n-1]=1;z[n-1]=0;c[n-1]=0;
+  for(let j=n-2;j>=0;j--){c[j]=z[j]-mu[j]*c[j+1];b[j]=(pts[j+1].y-pts[j].y)/h[j]-h[j]*(c[j+1]+2*c[j])/3;d[j]=(c[j+1]-c[j])/(3*h[j]);}
+  let j=0;for(let i=0;i<n-2;i++){if(xq>=pts[i].x)j=i;}
+  const dx=xq-pts[j].x;return pts[j].y+b[j]*dx+c[j]*dx*dx+d[j]*dx*dx*dx;
+}
+
+const PRESETS={
+  steam_sat_T:{label:'T (°C)',yLabel:'h_fg (kJ/kg)',desc:'Latent heat of vaporization of water. Values approximated from standard steam tables — verify against textbook.',data:[[0,2501],[10,2478],[20,2454],[30,2430],[40,2406],[50,2382],[60,2357],[70,2333],[80,2308],[90,2283],[100,2257],[110,2230],[120,2203],[140,2145],[160,2083],[180,2015],[200,1941],[220,1859],[240,1767],[260,1662],[280,1543],[300,1405],[320,1239],[340,1028],[360,720],[374,0]]},
+  air_cp:{label:'T (K)',yLabel:'Cp (kJ/kg·K)',desc:'Specific heat of air at constant pressure. Approximated from standard air property tables.',data:[[250,1.003],[300,1.005],[350,1.008],[400,1.014],[450,1.021],[500,1.030],[550,1.040],[600,1.051],[650,1.063],[700,1.075],[750,1.087],[800,1.099],[900,1.121],[1000,1.141],[1200,1.175],[1400,1.207]]},
+  water_visc:{label:'T (°C)',yLabel:'μ (mPa·s)',desc:'Dynamic viscosity of liquid water. Approximated from standard property tables.',data:[[0,1.792],[5,1.519],[10,1.307],[15,1.138],[20,1.002],[25,0.890],[30,0.798],[40,0.653],[50,0.547],[60,0.467],[70,0.404],[80,0.355],[90,0.315],[100,0.282]]},
+  steam_sat_P:{label:'P (kPa)',yLabel:'T_sat (°C)',desc:'Saturation temperature of water vs pressure. Approximated from standard steam tables.',data:[[0.6113,0],[1,6.98],[2,17.50],[4,28.96],[10,45.81],[20,60.06],[40,75.87],[100,99.63],[200,120.23],[400,143.63],[1000,179.91],[2000,212.4],[5000,263.9],[10000,311.0],[22089,374.14]]}
+};
+
+function loadPreset(){
+  const key=document.getElementById('preset-table').value,p=PRESETS[key];
+  document.getElementById('preset-query-label').textContent=`Interpolate at ${p.label} =`;
+  document.getElementById('preset-desc').textContent=p.desc;
+  document.getElementById('preset-result').style.display='none';
+  document.getElementById('preset-extrap-warn').classList.remove('visible');
+}
+
+function runPreset(){
+  const key=document.getElementById('preset-table').value,xq=parseFloat(document.getElementById('preset-query').value),p=PRESETS[key];
+  if(isNaN(xq)){alert('Please enter a value.');return;}
+  const pts=p.data.map(([x,y])=>({x,y}));
+  const isExtrap=xq<pts[0].x||xq>pts[pts.length-1].x;
+  document.getElementById('preset-extrap-warn').classList.toggle('visible',isExtrap);
+  const r=linearInterp(pts,xq);
+  let html=`<h4>Table range</h4><div class="step">${p.label}: ${fmt(pts[0].x)} to ${fmt(pts[pts.length-1].x)}</div>`;
+  html+=`<h4>Surrounding interval</h4><div class="step">${p.label}=${fmt(r.lo.x)} → ${p.yLabel}=${fmt(r.lo.y)}</div><div class="step">${p.label}=${fmt(r.hi.x)} → ${p.yLabel}=${fmt(r.hi.y)}</div>`;
+  html+=`<h4>Linear interpolation</h4><div class="step eq">y = ${fmt(r.lo.y)} + (${fmt(xq)} − ${fmt(r.lo.x)}) × (${fmt(r.hi.y-r.lo.y)}) / (${fmt(r.hi.x-r.lo.x)})</div>`;
+  html+=`<div class="answer-line">${p.yLabel} at ${p.label}=${fmt(xq)} → <strong>${fmt(r.yq)}</strong></div>`;
+  if(isExtrap)html+=`<div style="margin-top:0.6rem;font-size:0.82rem;color:var(--amber);font-style:italic;">Extrapolated — outside table range.</div>`;
+  document.getElementById('preset-result-box').innerHTML=html;
+  document.getElementById('preset-result').style.display='block';
+}
+
+function runBilinear(){
+  const x1=parseFloat(document.getElementById('x1').value),x2=parseFloat(document.getElementById('x2').value);
+  const y1=parseFloat(document.getElementById('y1').value),y2=parseFloat(document.getElementById('y2').value);
+  const z11=parseFloat(document.getElementById('z11').value),z21=parseFloat(document.getElementById('z21').value);
+  const z12=parseFloat(document.getElementById('z12').value),z22=parseFloat(document.getElementById('z22').value);
+  const xt=parseFloat(document.getElementById('xt').value),yt=parseFloat(document.getElementById('yt').value);
+  const xL=document.getElementById('ax-label').value||'x',yL=document.getElementById('ay-label').value||'y',zL=document.getElementById('az-label').value||'z';
+  if([x1,x2,y1,y2,z11,z21,z12,z22,xt,yt].some(isNaN)){alert('Please fill in all fields.');return;}
+  if(x1>=x2||y1>=y2){alert('x₁ must be < x₂, and y₁ must be < y₂.');return;}
+  const tx=(xt-x1)/(x2-x1),ty=(yt-y1)/(y2-y1);
+  const R1=z11+tx*(z21-z11),R2=z12+tx*(z22-z12),zq=R1+ty*(R2-R1);
+  let html=`<h4>Known values</h4>`;
+  html+=`<div class="step">f(${xL}=${fmt(x1)}, ${yL}=${fmt(y1)}) = ${fmt(z11)}</div><div class="step">f(${xL}=${fmt(x2)}, ${yL}=${fmt(y1)}) = ${fmt(z21)}</div>`;
+  html+=`<div class="step">f(${xL}=${fmt(x1)}, ${yL}=${fmt(y2)}) = ${fmt(z12)}</div><div class="step">f(${xL}=${fmt(x2)}, ${yL}=${fmt(y2)}) = ${fmt(z22)}</div>`;
+  html+=`<h4>Step 1 — Interpolation fractions</h4>`;
+  html+=`<div class="step eq">t_x = (${fmt(xt)} − ${fmt(x1)}) / (${fmt(x2)} − ${fmt(x1)}) = ${fmt(tx,4)}</div>`;
+  html+=`<div class="step eq">t_y = (${fmt(yt)} − ${fmt(y1)}) / (${fmt(y2)} − ${fmt(y1)}) = ${fmt(ty,4)}</div>`;
+  html+=`<h4>Step 2 — Interpolate along ${xL} at ${yL}=${fmt(y1)} (R₁)</h4>`;
+  html+=`<div class="step eq">R₁ = ${fmt(z11)} + ${fmt(tx,4)} × (${fmt(z21)} − ${fmt(z11)}) = ${fmt(R1)}</div>`;
+  html+=`<h4>Step 3 — Interpolate along ${xL} at ${yL}=${fmt(y2)} (R₂)</h4>`;
+  html+=`<div class="step eq">R₂ = ${fmt(z12)} + ${fmt(tx,4)} × (${fmt(z22)} − ${fmt(z12)}) = ${fmt(R2)}</div>`;
+  html+=`<h4>Step 4 — Interpolate along ${yL}</h4>`;
+  html+=`<div class="step eq">f* = ${fmt(R1)} + ${fmt(ty,4)} × (${fmt(R2)} − ${fmt(R1)})</div>`;
+  html+=`<div class="answer-line">${zL} at ${xL}=${fmt(xt)}, ${yL}=${fmt(yt)} → <strong>${fmt(zq)}</strong></div>`;
+  const isExtrap=xt<x1||xt>x2||yt<y1||yt>y2;
+  if(isExtrap)html+=`<div style="margin-top:0.6rem;font-size:0.82rem;color:var(--amber);font-style:italic;">Target is outside the given rectangle — extrapolation. Treat with caution.</div>`;
+  document.getElementById('bilinear-result-box').innerHTML=html;
+  document.getElementById('bilinear-result').style.display='block';
+}
+loadPreset();
+</script>
+</body>
+</html>
