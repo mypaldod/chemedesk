@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ChemDesk — ChemE Tools for Students</title>
+<meta name="description" content="Free thermodynamics solvers, steam tables, interpolation, EOS calculator, flash calculator, and AI tutor. Built by ChemE students, for ChemE students."/>
+<meta property="og:title" content="ChemDesk — ChemE Tools for Students"/>
+<meta property="og:description" content="VLE solvers, steam tables, flash calculator, lab report writer, and AI tutor. Free. No account required."/>
+<meta property="og:type" content="website"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23003B71'/><text x='5' y='24' font-size='20' font-family='serif' font-weight='bold' fill='%23C8922A'>C</text></svg>"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f4f4ef;--bg3:#eaeae3;
+  --border:#d0cfc8;--border2:#a0a098;
+  --navy:#003B71;--teal:#006B8F;--gold:#C8922A;--light:#E8F0F7;
+  --text:#1a1a1a;--text2:#444;--text3:#777;--text4:#aaa;
+  --serif:'Times New Roman','Times',serif;
+  --mono:'Courier New',monospace;
+  --r:4px;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--serif);min-height:100vh;font-size:15px}
+button{font-family:var(--serif)}
+textarea,input,select{font-family:var(--serif)}
+
+/* NAV */
+nav{display:flex;align-items:center;height:54px;border-bottom:2px solid var(--navy);background:#fff;position:sticky;top:0;z-index:200;overflow-x:auto}
+.nav-logo{font-size:18px;font-weight:700;color:var(--navy);padding:0 20px;border-right:1px solid var(--border);height:100%;display:flex;align-items:center;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.nav-logo span{color:var(--gold)}
+.nav-pages{display:flex;height:100%;flex:1;overflow-x:auto}
+.nav-page{padding:0 14px;font-size:13px;color:var(--text3);border:none;background:transparent;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.nav-page:hover{color:var(--navy)}
+.nav-page.active{color:var(--navy);border-bottom-color:var(--gold);font-weight:700}
+.nav-end{margin-left:auto;padding:0 16px;display:flex;gap:8px;align-items:center;flex-shrink:0}
+.nav-btn{background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border:none;cursor:pointer;white-space:nowrap}
+.nav-btn:hover{background:var(--teal)}
+
+/* PAGES */
+.page{display:none}
+.page.active{display:block}
+
+/* HERO */
+.hero{background:var(--navy);color:#fff;padding:64px 24px 52px;text-align:center}
+.hero-badge{display:inline-block;font-size:11px;color:var(--gold);border:1px solid var(--gold);padding:3px 12px;margin-bottom:20px;letter-spacing:1.5px;text-transform:uppercase}
+.hero h1{font-size:clamp(26px,4vw,50px);font-weight:700;line-height:1.15;margin-bottom:14px}
+.hero h1 span{color:var(--gold)}
+.hero p{font-size:15px;color:#b0c8e0;max-width:500px;margin:0 auto 32px;line-height:1.8}
+.hero-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn-gold{background:var(--gold);color:#fff;font-size:14px;font-weight:700;padding:10px 22px;border:none;cursor:pointer}
+.btn-gold:hover{background:#b07e22}
+.btn-outline{background:transparent;color:#fff;font-size:14px;padding:10px 22px;border:1px solid rgba(255,255,255,.35);cursor:pointer}
+.btn-outline:hover{border-color:#fff}
+.stats-row{display:flex;max-width:680px;margin:48px auto 0;border:1px solid rgba(255,255,255,.15);overflow:hidden;flex-wrap:wrap}
+.stat{flex:1;min-width:120px;padding:16px 10px;text-align:center;border-right:1px solid rgba(255,255,255,.12)}
+.stat:last-child{border-right:none}
+.stat-n{font-size:18px;font-weight:700;color:var(--gold);font-family:var(--mono)}
+.stat-l{font-size:11px;color:#7a9abb;margin-top:3px}
+
+/* FEATURES */
+.feat-section{padding:56px 24px;background:#fff}
+.section-kicker{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--teal);margin-bottom:8px}
+.section-h{font-size:clamp(18px,2.5vw,28px);font-weight:700;color:var(--navy);margin-bottom:10px}
+.section-sub{font-size:14px;color:var(--text2);max-width:500px;line-height:1.8;margin-bottom:40px}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px}
+.feat-item{border-top:3px solid var(--navy);padding-top:16px;cursor:pointer}
+.feat-item:hover .feat-h{color:var(--teal)}
+.feat-num{font-size:11px;color:var(--gold);font-family:var(--mono);margin-bottom:8px;letter-spacing:1px}
+.feat-h{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:8px;transition:color .15s}
+.feat-d{font-size:13px;color:var(--text2);line-height:1.8}
+
+/* BY STUDENTS BAND */
+.students-band{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:36px 24px;text-align:center}
+.students-band p.tag{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--teal);margin-bottom:10px}
+.students-band h2{font-size:clamp(16px,2vw,24px);font-weight:700;color:var(--navy);margin-bottom:12px}
+.students-band p.body{font-size:14px;color:var(--text2);max-width:560px;margin:0 auto;line-height:1.9}
+.pillars{display:flex;justify-content:center;gap:0;margin-top:28px;flex-wrap:wrap;border:1px solid var(--border);max-width:700px;margin-left:auto;margin-right:auto}
+.pillar{flex:1;min-width:160px;padding:18px 16px;border-right:1px solid var(--border);text-align:center}
+.pillar:last-child{border-right:none}
+.pillar-num{font-size:11px;color:var(--gold);font-family:var(--mono);margin-bottom:6px}
+.pillar-h{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.pillar-d{font-size:12px;color:var(--text3);line-height:1.7}
+
+/* TOOLS PAGE */
+.tools-layout{display:grid;grid-template-columns:190px 1fr;min-height:calc(100vh - 54px)}
+@media(max-width:640px){.tools-layout{grid-template-columns:1fr}.tools-sidebar{display:flex;flex-wrap:wrap;padding:8px;gap:4px;border-right:none;border-bottom:1px solid var(--border)}}
+.tools-sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:16px 0}
+.sidebar-section{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text4);padding:10px 16px 4px}
+.sidebar-item{display:flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;color:var(--text2);cursor:pointer;border-left:3px solid transparent;transition:all .15s}
+@media(max-width:640px){.sidebar-item{border-left:none;border-bottom:2px solid transparent;padding:6px 10px;font-size:12px}.sidebar-item.active{border-bottom-color:var(--gold);border-left:none}.sidebar-section{display:none}}
+.sidebar-item:hover{background:var(--bg3);color:var(--navy)}
+.sidebar-item.active{background:var(--light);color:var(--navy);border-left-color:var(--gold);font-weight:700}
+.tools-main{padding:28px 24px;background:#fff;overflow-y:auto}
+.tool-pane{display:none}
+.tool-pane.active{display:block}
+.tool-h{font-size:19px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.tool-sub{font-size:13px;color:var(--text3);margin-bottom:20px;line-height:1.7}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:640px){.two-col{grid-template-columns:1fr}}
+.ig{margin-bottom:12px}
+.ig label{display:block;font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.ig input,.ig select,.ig textarea{width:100%;background:#fff;border:1px solid var(--border);padding:7px 10px;color:var(--text);font-size:13px;font-family:var(--serif);outline:none;transition:border-color .15s;resize:vertical}
+.ig input:focus,.ig select:focus,.ig textarea:focus{border-color:var(--teal)}
+.ig textarea{min-height:80px}
+.calc-btn{background:var(--navy);color:#fff;font-size:13px;font-weight:700;padding:9px 20px;border:none;cursor:pointer;margin-top:6px;transition:background .15s}
+.calc-btn:hover{background:var(--teal)}
+.calc-btn.gold{background:var(--gold)}
+.calc-btn.gold:hover{background:#b07e22}
+.result-panel{background:var(--light);border-left:4px solid var(--teal);padding:14px;margin-top:12px;font-size:13px;min-height:56px;line-height:1.9}
+.rp-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--teal);margin-bottom:8px;font-family:var(--mono)}
+.rrow{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #d0dce8}
+.rrow:last-child{border-bottom:none}
+.rk{color:var(--text2);font-size:13px}
+.rv{color:var(--navy);font-size:13px;font-weight:700;font-family:var(--mono)}
+.ai-panel{background:#fffcf3;border-left:4px solid var(--gold);padding:14px;margin-top:10px;font-size:13px;color:var(--text2);line-height:1.8;display:none}
+.ai-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:6px;font-family:var(--mono)}
+.warn{background:#fff8e8;border-left:3px solid var(--gold);padding:8px 12px;font-size:12px;color:#6b4f00;margin-top:10px;line-height:1.7}
+.err-panel{background:#fff0f0;border-left:4px solid #c0392b;padding:12px;margin-top:10px;font-size:13px;color:#7a0000;display:none}
+.typing{animation:blink 1s infinite;font-family:var(--mono);font-size:12px;color:var(--text4)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.preview-flag{background:var(--light);border-left:4px solid var(--navy);padding:10px 14px;font-size:12px;color:var(--navy);margin-bottom:18px}
+.preview-flag a{color:var(--teal)}
+.ex-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.ex-tab{font-size:12px;padding:5px 12px;border:1px solid var(--border2);background:#fff;color:var(--text2);cursor:pointer;transition:all .15s}
+.ex-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.ex-tab.locked{color:var(--text4);cursor:not-allowed;background:var(--bg2)}
+
+/* STEAM TABLE */
+.steam-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+.steam-card{background:var(--light);border:1px solid #c0d8ec;padding:12px;text-align:center}
+.steam-card-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);margin-bottom:4px;font-family:var(--mono)}
+.steam-card-val{font-size:16px;font-weight:700;color:var(--navy);font-family:var(--mono)}
+.steam-card-unit{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* LAB REPORT */
+.lab-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 54px)}
+@media(max-width:640px){.lab-layout{grid-template-columns:1fr}.lab-sidebar{display:flex;flex-wrap:wrap;gap:4px;padding:8px;border-right:none;border-bottom:1px solid var(--border)}}
+.lab-sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:16px}
+.lab-section-btn{width:100%;text-align:left;padding:8px 10px;font-size:13px;color:var(--text2);background:transparent;border:none;cursor:pointer;border-left:3px solid transparent;margin-bottom:2px;transition:all .15s}
+@media(max-width:640px){.lab-section-btn{width:auto;border-left:none;border-bottom:2px solid transparent;font-size:12px;padding:5px 8px}}
+.lab-section-btn:hover{background:var(--bg3);color:var(--navy)}
+.lab-section-btn.active{background:var(--light);color:var(--navy);border-left-color:var(--gold);font-weight:700}
+.lab-main{padding:28px 24px;background:#fff}
+.lab-pane{display:none}
+.lab-pane.active{display:block}
+.doc-output{background:#fff;border:1px solid var(--border);padding:20px 24px;min-height:180px;font-size:14px;line-height:1.9;color:var(--text);margin-top:12px;white-space:pre-wrap;outline:none}
+.doc-output:focus{border-color:var(--teal)}
+
+/* STUDY */
+.study-page{padding:36px 24px}
+.study-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.study-card{background:#fff;border:1px solid var(--border);padding:22px}
+.study-card h3{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.study-card p{font-size:13px;color:var(--text3);margin-bottom:14px;line-height:1.7}
+.chat-box{background:var(--bg2);border:1px solid var(--border)}
+.chat-msgs{padding:12px;min-height:150px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:90%;font-size:13px;line-height:1.8;padding:8px 12px}
+.msg.u{background:var(--navy);color:#fff;align-self:flex-end}
+.msg.a{background:#fff;color:var(--text2);align-self:flex-start;border:1px solid var(--border)}
+.chat-row{display:flex;border-top:1px solid var(--border)}
+.chat-row input{flex:1;border:none;padding:10px 12px;font-size:13px;font-family:var(--serif);outline:none;background:#fff;min-width:0}
+.chat-row button{background:var(--navy);color:#fff;border:none;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0}
+.chat-row button:hover{background:var(--teal)}
+.formula-output{background:#fff;border:1px solid var(--border);padding:18px;min-height:100px;font-size:13px;line-height:2;font-family:var(--mono);white-space:pre-wrap;color:var(--text)}
+
+/* PROJECTS */
+.projects-page{padding:36px 24px}
+.proj-filters{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;align-items:center}
+.proj-filter-btn{font-size:12px;padding:5px 12px;border:1px solid var(--border2);background:#fff;color:var(--text2);cursor:pointer;transition:all .15s}
+.proj-filter-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin-bottom:32px}
+.proj-card{background:#fff;border:1px solid var(--border);padding:18px;cursor:pointer;transition:border-color .15s}
+.proj-card:hover{border-color:var(--teal)}
+.proj-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px}
+.proj-title{font-size:14px;font-weight:700;color:var(--navy);line-height:1.4}
+.proj-tag{font-size:10px;padding:3px 7px;background:var(--light);color:var(--navy);font-family:var(--mono);white-space:nowrap;flex-shrink:0}
+.proj-desc{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:10px}
+.proj-meta{display:flex;gap:10px;font-size:11px;color:var(--text4);align-items:center}
+.proj-author{font-size:12px;color:var(--teal)}
+.post-form{background:var(--bg2);border:1px solid var(--border);padding:20px;margin-bottom:28px}
+.post-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.post-form-grid{grid-template-columns:1fr}}
+
+/* FLASH */
+.flash-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px}
+.flash-table th{background:var(--navy);color:#fff;padding:7px 10px;text-align:left;font-size:11px;font-weight:700}
+.flash-table td{padding:5px 8px;border-bottom:1px solid var(--border)}
+.flash-table td input{width:90%;border:1px solid var(--border);padding:3px 6px;font-size:12px;font-family:var(--mono)}
+.flash-table tr:hover td{background:var(--bg2)}
+.add-comp-btn{font-size:12px;padding:5px 12px;border:1px solid var(--teal);color:var(--teal);background:transparent;cursor:pointer;margin-bottom:10px}
+.add-comp-btn:hover{background:var(--teal);color:#fff}
+
+/* PRICING */
+.pricing-page{padding:52px 24px;background:var(--bg2)}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0;border:1px solid var(--border);max-width:900px;margin:0 auto}
+.plan{background:#fff;padding:26px 22px;border-right:1px solid var(--border)}
+@media(max-width:640px){.plan{border-right:none;border-bottom:1px solid var(--border)}}
+.plan:last-child{border-right:none}
+.plan.featured{background:var(--navy);color:#fff}
+.plan-tier{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--teal);margin-bottom:6px}
+.plan.featured .plan-tier{color:#7aadcc}
+.plan-name{font-size:18px;font-weight:700;color:var(--navy);margin-bottom:3px}
+.plan.featured .plan-name{color:#fff}
+.plan-price{font-size:24px;font-weight:700;color:var(--navy);font-family:var(--mono);margin-bottom:3px}
+.plan.featured .plan-price{color:var(--gold)}
+.plan-price span{font-size:13px;font-weight:400;color:var(--text3)}
+.plan.featured .plan-price span{color:#7aadcc}
+.plan-desc{font-size:12px;color:var(--text2);margin-bottom:4px;line-height:1.6}
+.plan.featured .plan-desc{color:#b8d0e0}
+.plan-note{font-size:11px;color:var(--text4);margin-bottom:20px;font-style:italic}
+.plan.featured .plan-note{color:#7aadcc}
+.plan-features{list-style:none;font-size:12px;margin-bottom:22px}
+.plan-features li{padding:5px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:7px;line-height:1.5;color:var(--text2)}
+.plan.featured .plan-features li{border-bottom-color:rgba(255,255,255,.15);color:#c0d8e8}
+.plan-features li:last-child{border-bottom:none}
+.ck{color:var(--teal);flex-shrink:0}
+.plan.featured .ck{color:var(--gold)}
+.plan-btn{width:100%;padding:10px;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--navy);border:2px solid var(--navy);transition:all .15s}
+.plan-btn:hover{background:var(--navy);color:#fff}
+.plan.featured .plan-btn{background:var(--gold);color:#fff;border-color:var(--gold)}
+.plan.featured .plan-btn:hover{background:#b07e22;border-color:#b07e22}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">Chem<span>Desk</span></div>
+  <div class="nav-pages">
+    <button class="nav-page active" onclick="showPage('home')">Home</button>
+    <button class="nav-page" onclick="showPage('tools')">Tools</button>
+    <button class="nav-page" onclick="showPage('lab')">Lab Report</button>
+    <button class="nav-page" onclick="showPage('study')">Study</button>
+    <button class="nav-page" onclick="showPage('projects')">Projects</button>
+    <button class="nav-page" onclick="showPage('pricing')">Pricing</button>
+  </div>
+  <div class="nav-end">
+    <button class="nav-btn" onclick="showPage('pricing')">Get access</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-badge">By ChemE students · for ChemE students</div>
+    <h1>The toolkit your<br><span>ChemE courses assume you have</span></h1>
+    <p>Thermodynamics solvers, steam tables, flash calculations, interpolation, lab report writer, and an AI tutor. Free to start. No account required.</p>
+    <div class="hero-btns">
+      <button class="btn-gold" onclick="showPage('tools')">Open toolkit</button>
+      <button class="btn-outline" onclick="showPage('lab')">Lab report writer →</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-n">7</div><div class="stat-l">Solvers & tools</div></div>
+      <div class="stat"><div class="stat-n">AI</div><div class="stat-l">Tutor + writer</div></div>
+      <div class="stat"><div class="stat-n">Free</div><div class="stat-l">No account core</div></div>
+      <div class="stat"><div class="stat-n">chemdesk.io</div><div class="stat-l">Coming soon</div></div>
+    </div>
+  </div>
+
+  <div class="feat-section">
+    <div style="max-width:960px;margin:0 auto">
+      <div class="section-kicker">What's inside</div>
+      <div class="section-h">Everything a ChemE student actually needs</div>
+      <div class="section-sub" style="margin-bottom:36px">Not a generic calculator. Every tool is designed around the specific problems that appear in thermodynamics, transport, and reaction engineering.</div>
+      <div class="feat-grid">
+        <div class="feat-item" onclick="showPage('tools');showTool('thermo')">
+          <div class="feat-num">01</div>
+          <div class="feat-h">Thermodynamics / VLE</div>
+          <div class="feat-d">Modified Raoult, Margules, Wilson. Computes γ₁, γ₂, P, y₁, y₂ with AI explanation.</div>
+        </div>
+        <div class="feat-item" onclick="showPage('tools');showTool('steam')">
+          <div class="feat-num">02</div>
+          <div class="feat-h">Steam table lookup</div>
+          <div class="feat-d">Enter T and P. Get all thermodynamic properties instantly — no manual interpolation needed.</div>
+        </div>
+        <div class="feat-item" onclick="showPage('tools');showTool('flash')">
+          <div class="feat-num">03</div>
+          <div class="feat-h">Flash calculator</div>
+          <div class="feat-d">Rachford-Rice multicomponent flash. Add any number of components, get V, L, xᵢ, yᵢ.</div>
+        </div>
+        <div class="feat-item" onclick="showPage('tools');showTool('eos')">
+          <div class="feat-num">04</div>
+          <div class="feat-h">EOS calculator</div>
+          <div class="feat-d">van der Waals, RK, SRK, Peng-Robinson. Solves for V, Z, ρ via Newton-Raphson.</div>
+        </div>
+        <div class="feat-item" onclick="showPage('tools');showTool('interp')">
+          <div class="feat-num">05</div>
+          <div class="feat-h">Interpolation</div>
+          <div class="feat-d">Bilinear, Lagrange, Newton divided difference. Built for steam table lookups.</div>
+        </div>
+        <div class="feat-item" onclick="showPage('lab')">
+          <div class="feat-num">06</div>
+          <div class="feat-h">Lab report writer</div>
+          <div class="feat-d">Paste your rubric and data. AI drafts each section separately for you to review.</div>
+        </div>
+        <div class="feat-item" onclick="showPage('study')">
+          <div class="feat-num">07</div>
+          <div class="feat-h">ChemE tutor + formula sheets</div>
+          <div class="feat-d">Ask anything. Get a formula reference for any topic. Step-by-step problem solver.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="students-band">
+    <p class="tag">Our philosophy</p>
+    <h2>By ChemE students, for ChemE students</h2>
+    <p class="body">ChemDesk exists because the tools ChemE courses assume you have don't actually exist in one place. We built what we wished existed at 11pm before an exam.</p>
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-num">01</div>
+        <div class="pillar-h">Built for ChemE</div>
+        <div class="pillar-d">Not a generic calculator. Every tool is designed around real ChemE problem sets.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02</div>
+        <div class="pillar-h">Shows every step</div>
+        <div class="pillar-d">Every calculation shows the full derivation. Designed for understanding, not just answers.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03</div>
+        <div class="pillar-h">Honest about limits</div>
+        <div class="pillar-d">When results depend on approximations, we flag it. No false precision.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:52px 24px;background:var(--navy);text-align:center">
+    <p style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#7aadcc;margin-bottom:10px">Pricing</p>
+    <p style="font-size:clamp(18px,2vw,26px);font-weight:700;color:#fff;margin-bottom:12px">Free to start. No account, no card.</p>
+    <p style="font-size:14px;color:#8ab8d0;max-width:460px;margin:0 auto 28px;line-height:1.8">Unit converter, interpolation, and steam tables are unlimited forever. Upgrade only when you need the full solvers.</p>
+    <button class="btn-gold" onclick="showPage('pricing')">View pricing →</button>
+  </div>
+  <div style="padding:22px 24px;background:var(--bg2);text-align:center;border-top:1px solid var(--border)">
+    <p style="font-size:12px;color:var(--text4);font-family:var(--mono)"><span style="color:var(--gold)">ChemDesk</span> · By ChemE students, for ChemE students · chemdesk.io coming soon</p>
+  </div>
+</div>
+
+<!-- TOOLS PAGE -->
+<div class="page" id="page-tools">
+  <div class="tools-layout">
+    <div class="tools-sidebar">
+      <div class="sidebar-section">Solvers</div>
+      <div class="sidebar-item active" onclick="showTool('thermo')">Thermo / VLE</div>
+      <div class="sidebar-item" onclick="showTool('steam')">Steam tables</div>
+      <div class="sidebar-item" onclick="showTool('flash')">Flash calc</div>
+      <div class="sidebar-item" onclick="showTool('eos')">EOS calculator</div>
+      <div class="sidebar-section">Data tools</div>
+      <div class="sidebar-item" onclick="showTool('interp')">Interpolation</div>
+      <div class="sidebar-item" onclick="showTool('units')">Unit converter</div>
+    </div>
+    <div class="tools-main">
+
+      <!-- THERMO -->
+      <div class="tool-pane active" id="tp-thermo">
+        <div class="tool-h">Thermodynamics / VLE solver</div>
+        <div class="tool-sub">Activity coefficient models for vapor-liquid equilibrium. Modified Raoult's Law, Margules, Wilson.</div>
+        <div class="preview-flag"><b>Preview:</b> 2 free examples. <a href="#" onclick="showPage('pricing')">Free account</a> unlocks 5 uses per 2 months.</div>
+        <div class="ex-tabs">
+          <button class="ex-tab active" onclick="loadTE('energy',this)">Energy balance</button>
+          <button class="ex-tab" onclick="loadTE('carnot',this)">Carnot</button>
+          <button class="ex-tab locked">Rankine &#128274;</button>
+        </div>
+        <div class="two-col">
+          <div>
+            <div class="ig"><label>Model</label><select id="t-model" onchange="toggleM()"><option value="raoult">Modified Raoult's Law</option><option value="margules">Margules (2-suffix)</option><option value="wilson">Wilson</option></select></div>
+            <div class="ig"><label>Temperature (°C)</label><input id="t-temp" type="number" value="70"/></div>
+            <div class="ig"><label>x₁ liquid mole fraction</label><input id="t-x1" type="number" value="0.4" step="0.01" min="0" max="1"/></div>
+            <div class="ig"><label>P₁ sat (kPa)</label><input id="t-p1" type="number" value="31.16" step="0.01"/></div>
+            <div class="ig"><label>P₂ sat (kPa)</label><input id="t-p2" type="number" value="19.94" step="0.01"/></div>
+            <div class="ig" id="tA12g" style="display:none"><label>A₁₂</label><input id="t-A12" type="number" value="0.5" step="0.01"/></div>
+            <div class="ig" id="tA21g" style="display:none"><label>A₂₁</label><input id="t-A21" type="number" value="0.3" step="0.01"/></div>
+            <button class="calc-btn" onclick="calcT()">Calculate VLE →</button>
+          </div>
+          <div>
+            <div class="result-panel" id="t-res"><div class="rp-label">Results</div><span style="color:var(--text4);font-size:13px">Enter parameters and calculate.</span></div>
+            <div class="ai-panel" id="t-ai"><div class="ai-label">Tutor explanation</div><div id="t-ai-txt"></div></div>
+            <div class="err-panel" id="t-err"></div>
+            <div class="warn">⚠ Saturation pressures should be verified against Antoine equation values in your textbook.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEAM TABLES -->
+      <div class="tool-pane" id="tp-steam">
+        <div class="tool-h">Steam table lookup</div>
+        <div class="tool-sub">Enter temperature and pressure. Get all thermodynamic properties instantly — no manual interpolation. Unlimited, no account required.</div>
+        <div class="two-col">
+          <div>
+            <div class="ig"><label>Lookup by</label><select id="st-by" onchange="stToggle()"><option value="TP">Temperature + Pressure</option><option value="T">Saturated — Temperature only</option><option value="P">Saturated — Pressure only</option></select></div>
+            <div class="ig" id="st-T-group"><label>Temperature (°C)</label><input id="st-T" type="number" value="150" step="1"/></div>
+            <div class="ig" id="st-P-group"><label>Pressure (MPa)</label><input id="st-P" type="number" value="0.5" step="0.01"/></div>
+            <button class="calc-btn" onclick="calcSteam()">Look up properties →</button>
+            <div class="warn" style="margin-top:12px">⚠ Values computed from IAPWS-IF97 correlations. For homework and exams, always verify against your textbook's steam tables.</div>
+          </div>
+          <div>
+            <div class="result-panel" id="st-res" style="min-height:80px"><div class="rp-label">Properties</div><span style="color:var(--text4);font-size:13px">Enter conditions and look up.</span></div>
+            <div id="steam-cards" style="margin-top:12px"></div>
+            <div class="err-panel" id="st-err"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FLASH -->
+      <div class="tool-pane" id="tp-flash">
+        <div class="tool-h">Multicomponent flash calculator</div>
+        <div class="tool-sub">Rachford-Rice equation for isothermal flash. Enter K-values (K = y/x) and feed mole fractions z.</div>
+        <table class="flash-table" id="flash-tbl">
+          <thead><tr><th>Component</th><th>z (feed fraction)</th><th>K-value (y/x)</th></tr></thead>
+          <tbody id="flash-tbody">
+            <tr><td><input value="Component 1"/></td><td><input type="number" value="0.5" step="any"/></td><td><input type="number" value="2.5" step="any"/></td></tr>
+            <tr><td><input value="Component 2"/></td><td><input type="number" value="0.3" step="any"/></td><td><input type="number" value="0.8" step="any"/></td></tr>
+            <tr><td><input value="Component 3"/></td><td><input type="number" value="0.2" step="any"/></td><td><input type="number" value="0.3" step="any"/></td></tr>
+          </tbody>
+        </table>
+        <button class="add-comp-btn" onclick="addComp()">+ Add component</button>
+        <div class="warn" style="margin-bottom:10px">⚠ z values must sum to 1.0. K-values from Antoine equation + Raoult's Law or bubble/dew point correlations.</div>
+        <button class="calc-btn" onclick="calcFlash()">Solve (Rachford-Rice) →</button>
+        <div class="result-panel" id="flash-res" style="margin-top:12px"><div class="rp-label">Results</div><span style="color:var(--text4);font-size:13px">Enter components and solve.</span></div>
+        <div class="ai-panel" id="flash-ai"><div class="ai-label">Tutor explanation</div><div id="flash-ai-txt"></div></div>
+        <div class="err-panel" id="flash-err"></div>
+      </div>
+
+      <!-- EOS -->
+      <div class="tool-pane" id="tp-eos">
+        <div class="tool-h">Equation of State calculator</div>
+        <div class="tool-sub">Solve for molar volume V, compressibility Z, density ρ. vdW, RK, SRK, Peng-Robinson.</div>
+        <div class="preview-flag"><b>Preview:</b> 2 free examples. Premium unlocks BWR and full suite.</div>
+        <div class="ex-tabs">
+          <button class="ex-tab active" onclick="loadEE('water',this)">Water (vdW)</button>
+          <button class="ex-tab" onclick="loadEE('methane',this)">Methane (PR)</button>
+          <button class="ex-tab locked">BWR suite &#128274;</button>
+        </div>
+        <div class="two-col">
+          <div>
+            <div class="ig"><label>EOS</label><select id="e-eos"><option value="vdw">van der Waals</option><option value="rk">Redlich-Kwong</option><option value="srk">Soave-RK</option><option value="pr">Peng-Robinson</option></select></div>
+            <div class="ig"><label>T (K)</label><input id="e-T" type="number" value="400"/></div>
+            <div class="ig"><label>P (bar)</label><input id="e-P" type="number" value="10" step="0.1"/></div>
+            <div class="ig"><label>Tc (K)</label><input id="e-Tc" type="number" value="647.1"/></div>
+            <div class="ig"><label>Pc (bar)</label><input id="e-Pc" type="number" value="220.6"/></div>
+            <div class="ig"><label>ω acentric factor</label><input id="e-w" type="number" value="0.345" step="0.001"/></div>
+            <button class="calc-btn" onclick="calcE()">Solve EOS →</button>
+          </div>
+          <div>
+            <div class="result-panel" id="e-res"><div class="rp-label">Results</div><span style="color:var(--text4);font-size:13px">Enter fluid properties and solve.</span></div>
+            <div class="ai-panel" id="e-ai"><div class="ai-label">Tutor explanation</div><div id="e-ai-txt"></div></div>
+            <div class="err-panel" id="e-err"></div>
+            <div class="warn">⚠ Critical constants should be verified against NIST or your textbook appendix.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERPOLATION -->
+      <div class="tool-pane" id="tp-interp">
+        <div class="tool-h">Interpolation calculator</div>
+        <div class="tool-sub">Bilinear, Lagrange, linear, Newton divided difference. Unlimited for all users.</div>
+        <div class="ex-tabs">
+          <button class="ex-tab active" onclick="setIM('bilinear',this)">Bilinear</button>
+          <button class="ex-tab" onclick="setIM('lagrange',this)">Lagrange</button>
+          <button class="ex-tab" onclick="setIM('linear',this)">Linear</button>
+          <button class="ex-tab" onclick="setIM('newton',this)">Newton D.D.</button>
+        </div>
+        <div id="interp-bilinear">
+          <div class="two-col">
+            <div>
+              <p style="font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Corner coordinates</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+                <div class="ig"><label>x₁</label><input id="bl-x1" type="number" value="1" step="any"/></div>
+                <div class="ig"><label>x₂</label><input id="bl-x2" type="number" value="2" step="any"/></div>
+                <div class="ig"><label>y₁</label><input id="bl-y1" type="number" value="1" step="any"/></div>
+                <div class="ig"><label>y₂</label><input id="bl-y2" type="number" value="2" step="any"/></div>
+              </div>
+              <p style="font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Corner values f(x,y)</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+                <div class="ig"><label>Q(x₁,y₁)</label><input id="bl-q11" type="number" value="1" step="any"/></div>
+                <div class="ig"><label>Q(x₁,y₂)</label><input id="bl-q12" type="number" value="2" step="any"/></div>
+                <div class="ig"><label>Q(x₂,y₁)</label><input id="bl-q21" type="number" value="3" step="any"/></div>
+                <div class="ig"><label>Q(x₂,y₂)</label><input id="bl-q22" type="number" value="4" step="any"/></div>
+              </div>
+              <p style="font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Query point</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div class="ig"><label>x</label><input id="bl-xq" type="number" value="1.5" step="any"/></div>
+                <div class="ig"><label>y</label><input id="bl-yq" type="number" value="1.5" step="any"/></div>
+              </div>
+              <button class="calc-btn" onclick="calcBL()">Interpolate →</button>
+            </div>
+            <div><div class="result-panel" id="bl-res"><div class="rp-label">Result</div><span style="color:var(--text4);font-size:13px">Enter values and interpolate.</span></div></div>
+          </div>
+        </div>
+        <div id="interp-multi" style="display:none">
+          <div class="two-col">
+            <div>
+              <div class="ig"><label>x data (comma-separated)</label><input id="i-x" type="text" value="0, 1, 2, 3"/></div>
+              <div class="ig"><label>f(x) values (comma-separated)</label><input id="i-y" type="text" value="1, 2.7183, 7.389, 20.086"/></div>
+              <div class="ig"><label>Interpolate at x =</label><input id="i-xq" type="number" value="1.5" step="0.1"/></div>
+              <button class="calc-btn" onclick="calcI()">Interpolate →</button>
+            </div>
+            <div>
+              <div class="result-panel" id="i-res"><div class="rp-label">Result</div><span style="color:var(--text4);font-size:13px">Enter data and interpolate.</span></div>
+              <div class="ai-panel" id="i-ai"><div class="ai-label">Tutor explanation</div><div id="i-ai-txt"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UNITS -->
+      <div class="tool-pane" id="tp-units">
+        <div class="tool-h">Unit converter</div>
+        <div class="tool-sub">Pressure, temperature, energy, flow, mass. Unlimited for all users.</div>
+        <div class="two-col">
+          <div>
+            <div class="ig"><label>Category</label><select id="u-cat" onchange="uUpdate()"><option>Pressure</option><option>Temperature</option><option>Energy</option><option>Volumetric Flow</option><option>Mass</option></select></div>
+            <div class="ig"><label>From</label><select id="u-from" onchange="uCalc()"></select></div>
+            <div class="ig"><label>Value</label><input id="u-val" type="number" value="1" step="any" oninput="uCalc()"/></div>
+            <div class="ig"><label>To</label><select id="u-to" onchange="uCalc()"></select></div>
+            <button class="calc-btn" onclick="uCalc()">Convert →</button>
+          </div>
+          <div><div class="result-panel" id="u-res"><div class="rp-label">Result</div><span style="color:var(--text4);font-size:13px">Select units and enter a value.</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LAB REPORT PAGE -->
+<div class="page" id="page-lab">
+  <div class="lab-layout">
+    <div class="lab-sidebar">
+      <p style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text4);margin-bottom:10px">Sections</p>
+      <button class="lab-section-btn active" onclick="showLab('setup')">Setup & rubric</button>
+      <button class="lab-section-btn" onclick="showLab('intro')">Introduction</button>
+      <button class="lab-section-btn" onclick="showLab('theory')">Theory</button>
+      <button class="lab-section-btn" onclick="showLab('methods')">Methods</button>
+      <button class="lab-section-btn" onclick="showLab('results')">Results</button>
+      <button class="lab-section-btn" onclick="showLab('discussion')">Discussion</button>
+      <button class="lab-section-btn" onclick="showLab('conclusion')">Conclusion</button>
+      <button class="lab-section-btn" onclick="showLab('full')">Full report</button>
+      <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border)">
+        <p style="font-size:11px;color:var(--text4);line-height:1.7">Premium feature. <a href="#" onclick="showPage('pricing')" style="color:var(--teal)">Upgrade</a> for full access.</p>
+      </div>
+    </div>
+    <div class="lab-main">
+      <div class="lab-pane active" id="lp-setup">
+        <div class="tool-h">Lab report writer</div>
+        <div class="tool-sub">Paste your rubric and experiment details. AI drafts each section for you to review and edit.</div>
+        <div style="background:var(--bg2);border:1px solid var(--border);padding:14px;margin-bottom:14px">
+          <p style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Rubric (paste here — optional but recommended)</p>
+          <textarea id="lab-rubric" placeholder="Paste your lab rubric here. E.g.: Introduction (10 pts): must include background theory, reaction mechanism, and objective..."></textarea>
+        </div>
+        <div class="ig"><label>Experiment title</label><input id="lab-title" type="text" placeholder="e.g. NaBH₄ reduction of benzophenone"/></div>
+        <div class="ig"><label>Course</label><input id="lab-course" type="text" placeholder="e.g. Organic Chemistry Lab — CHEM 270"/></div>
+        <div class="ig"><label>Raw data / observations</label><textarea id="lab-data" placeholder="Paste your data, observations, yield calculations, or notes here." style="min-height:100px"></textarea></div>
+        <div class="ig"><label>Additional context (optional)</label><textarea id="lab-context" placeholder="Expected mechanism, reference values, peer comparison data..." style="min-height:60px"></textarea></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          <button class="calc-btn gold" onclick="genSection('intro')">Draft introduction →</button>
+          <button class="calc-btn" onclick="genSection('methods')">Draft methods →</button>
+          <button class="calc-btn" onclick="genSection('full')">Draft full report →</button>
+        </div>
+        <div class="warn" style="margin-top:14px">⚠ AI drafts are starting points. Always review for accuracy and comply with your course's academic integrity policy.</div>
+      </div>
+      <div class="lab-pane" id="lp-intro"><div class="tool-h">Introduction</div><div style="display:flex;gap:8px;margin-bottom:10px"><button class="calc-btn" onclick="genSection('intro')">Regenerate →</button><button class="calc-btn gold" onclick="showLab('setup')">← Setup</button></div><div class="doc-output" id="doc-intro" contenteditable="true">Click "Draft introduction" on the Setup page.</div></div>
+      <div class="lab-pane" id="lp-theory"><div class="tool-h">Theory</div><div style="display:flex;gap:8px;margin-bottom:10px"><button class="calc-btn" onclick="genSection('theory')">Generate →</button></div><div class="doc-output" id="doc-theory" contenteditable="true">Click Generate to draft this section.</div></div>
+      <div class="lab-pane" id="lp-methods"><div class="tool-h">Methods</div><div style="display:flex;gap:8px;margin-bottom:10px"><button class="calc-btn" onclick="genSection('methods')">Generate →</button></div><div class="doc-output" id="doc-methods" contenteditable="true">Click Generate to draft this section.</div></div>
+      <div class="lab-pane" id="lp-results"><div class="tool-h">Results</div><div style="display:flex;gap:8px;margin-bottom:10px"><button class="calc-btn" onclick="genSection('results')">Generate →</button></div><div class="doc-output" id="doc-results" contenteditable="true">Click Generate to draft this section.</div></div>
+      <div class="lab-pane" id="lp-discussion"><div class="tool-h">Discussion</div><div style="display:flex;gap:8px;margin-bottom:10px"><button class="calc-btn" onclick="genSection('discussion')">Generate →</button></div><div class="doc-output" id="doc-discussion" contenteditable="true">Click Generate to draft this section.</div></div>
+      <div class="lab-pane" id="lp-conclusion"><div class="tool-h">Conclusion</div><div style="display:flex;gap:8px;margin-bottom:10px"><button class="calc-btn" onclick="genSection('conclusion')">Generate →</button></div><div class="doc-output" id="doc-conclusion" contenteditable="true">Click Generate to draft this section.</div></div>
+      <div class="lab-pane" id="lp-full">
+        <div class="tool-h">Full report</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <button class="calc-btn gold" onclick="genSection('full')">Generate full report →</button>
+          <button class="calc-btn" onclick="copyReport()">Copy all text</button>
+        </div>
+        <div class="doc-output" id="doc-full" contenteditable="true">Generate individual sections or click "Generate full report".</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDY PAGE -->
+<div class="page" id="page-study">
+  <div class="study-page">
+    <div style="max-width:960px;margin:0 auto">
+      <div class="section-kicker">Study tools</div>
+      <div class="section-h" style="margin-bottom:6px">Tutor, formula sheets, concept explainer</div>
+      <div class="section-sub" style="margin-bottom:28px">Powered by Claude. Ask anything, get a formula sheet, or get a concept explained with full steps.</div>
+      <div class="study-grid">
+        <div class="study-card">
+          <h3>ChemE tutor</h3>
+          <p>Ask anything — VLE, EOS, balances, kinetics, transport. Shows all reasoning.</p>
+          <div class="chat-box">
+            <div class="chat-msgs" id="tutor-msgs">
+              <div class="msg a">Ask me anything from your ChemE coursework. I'll show every step.</div>
+            </div>
+            <div class="chat-row">
+              <input id="tutor-in" placeholder="e.g. Derive the Rachford-Rice equation..." onkeydown="if(event.key==='Enter')sendTutor()"/>
+              <button onclick="sendTutor()">Send</button>
+            </div>
+          </div>
+        </div>
+        <div class="study-card">
+          <h3>Formula sheet generator</h3>
+          <p>Type any topic or course. Get a clean formula reference instantly.</p>
+          <div class="ig"><label>Topic or course</label><input id="formula-topic" type="text" placeholder="e.g. VLE and activity coefficients, ChE 325"/></div>
+          <div class="ig"><label>Depth</label><select id="formula-depth"><option>Quick reference (1 page)</option><option>Standard (2 pages)</option><option>Comprehensive</option></select></div>
+          <button class="calc-btn" onclick="genFormula()" style="margin-bottom:10px">Generate →</button>
+          <div class="formula-output" id="formula-out">Enter a topic and generate.</div>
+          <button class="calc-btn" style="margin-top:8px" onclick="copyFormula()">Copy</button>
+          <div class="err-panel" id="formula-err"></div>
+        </div>
+        <div class="study-card">
+          <h3>Concept explainer</h3>
+          <p>Get a structured breakdown of any ChemE concept with examples.</p>
+          <div class="ig"><label>Concept</label><input id="concept-in" type="text" placeholder="e.g. Rachford-Rice, Wilson model, NLRP3"/></div>
+          <div class="ig"><label>Level</label><select id="concept-level"><option>Undergraduate intro</option><option>Upper division</option><option>Graduate level</option></select></div>
+          <button class="calc-btn" onclick="explainConcept()">Explain →</button>
+          <div class="ai-panel" id="concept-out" style="display:block;margin-top:10px;background:var(--bg2);border-left-color:var(--teal)"><div class="ai-label">Explanation</div><div id="concept-txt" style="color:var(--text4);font-size:13px">Enter a concept above.</div></div>
+          <div class="err-panel" id="concept-err"></div>
+        </div>
+        <div class="study-card">
+          <h3>Step-by-step solver</h3>
+          <p>Describe any problem. Get a full solution with every step labeled.</p>
+          <div class="ig"><label>Problem</label><textarea id="eq-in" placeholder="e.g. Find the dew point pressure for a binary mixture of methanol (y1=0.6) and water at 70°C using Modified Raoult's Law..." style="min-height:90px"></textarea></div>
+          <button class="calc-btn" onclick="solveEq()">Solve step by step →</button>
+          <div class="ai-panel" id="eq-out" style="display:block;margin-top:10px;background:var(--bg2);border-left-color:var(--navy)"><div class="ai-label">Solution</div><div id="eq-txt" style="color:var(--text4);font-size:13px">Enter a problem above.</div></div>
+          <div class="err-panel" id="eq-err"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECTS PAGE -->
+<div class="page" id="page-projects">
+  <div class="projects-page" style="max-width:960px;margin:0 auto">
+    <div class="section-kicker">Community</div>
+    <div class="section-h" style="margin-bottom:6px">ChemE projects board</div>
+    <div class="section-sub" style="margin-bottom:24px">Browse and share chemical engineering projects. Filter by topic, upvote what's useful.</div>
+    <div class="post-form">
+      <p style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px">Share a project</p>
+      <div class="post-form-grid">
+        <div class="ig"><label>Project title</label><input id="pj-title" type="text" placeholder="e.g. LNP formulation optimizer"/></div>
+        <div class="ig"><label>Topic tag</label><select id="pj-tag"><option>Thermodynamics</option><option>Transport phenomena</option><option>Reaction engineering</option><option>Biochemical engineering</option><option>Process design</option><option>Computational</option><option>Lab / experimental</option><option>Other</option></select></div>
+      </div>
+      <div class="ig"><label>Description</label><textarea id="pj-desc" placeholder="What problem does it solve? Any results?" style="min-height:70px"></textarea></div>
+      <div class="post-form-grid">
+        <div class="ig"><label>Your name / handle</label><input id="pj-author" type="text" placeholder="e.g. Anonymous ChemE, UMass"/></div>
+        <div class="ig"><label>Link (optional)</label><input id="pj-link" type="text" placeholder="GitHub, paper, demo URL..."/></div>
+      </div>
+      <button class="calc-btn gold" onclick="postProject()">Post project →</button>
+    </div>
+    <div class="proj-filters">
+      <span style="font-size:12px;color:var(--text3);margin-right:4px">Filter:</span>
+      <button class="proj-filter-btn active" onclick="filterProj('all',this)">All</button>
+      <button class="proj-filter-btn" onclick="filterProj('Thermodynamics',this)">Thermo</button>
+      <button class="proj-filter-btn" onclick="filterProj('Transport phenomena',this)">Transport</button>
+      <button class="proj-filter-btn" onclick="filterProj('Biochemical engineering',this)">Biochemical</button>
+      <button class="proj-filter-btn" onclick="filterProj('Reaction engineering',this)">Reaction</button>
+      <button class="proj-filter-btn" onclick="filterProj('Computational',this)">Computational</button>
+    </div>
+    <div class="proj-grid" id="proj-grid"></div>
+  </div>
+</div>
+
+<!-- PRICING PAGE -->
+<div class="page" id="page-pricing">
+  <div class="pricing-page">
+    <div style="max-width:900px;margin:0 auto">
+      <div class="section-kicker" style="text-align:center">Pricing</div>
+      <div class="section-h" style="text-align:center;margin-bottom:8px">Simple, honest pricing</div>
+      <div class="section-sub" style="text-align:center;margin:0 auto 36px;max-width:400px">Start with no account. Upgrade only when you need more.</div>
+      <div class="pricing-grid">
+        <div class="plan">
+          <div class="plan-tier">Tier 1</div>
+          <div class="plan-name">No account</div>
+          <div class="plan-price">$0<span>/month</span></div>
+          <div class="plan-desc">Free forever</div>
+          <div class="plan-note">Start immediately. No sign-up, no card.</div>
+          <ul class="plan-features">
+            <li><span class="ck">✓</span>Unit converter — unlimited</li>
+            <li><span class="ck">✓</span>Interpolation, bilinear — unlimited</li>
+            <li><span class="ck">✓</span>Steam table lookup — unlimited</li>
+            <li><span class="ck">✓</span>2 preview thermo examples</li>
+            <li><span class="ck">✓</span>2 preview EOS examples</li>
+          </ul>
+          <button class="plan-btn" onclick="showPage('tools')">Try the tools</button>
+        </div>
+        <div class="plan featured">
+          <div class="plan-tier">Tier 2 · Most popular to start</div>
+          <div class="plan-name">Free account</div>
+          <div class="plan-price">$0<span> with email</span></div>
+          <div class="plan-desc">Enough to get through problem sets. No card required.</div>
+          <div class="plan-note">&nbsp;</div>
+          <ul class="plan-features">
+            <li><span class="ck">✓</span>Everything in No Account</li>
+            <li><span class="ck">✓</span>5 thermo solver uses per 2 months</li>
+            <li><span class="ck">✓</span>5 EOS calculator uses per 2 months</li>
+            <li><span class="ck">✓</span>1 tutor mode session per 2 months</li>
+            <li><span class="ck">✓</span>Share with 5 classmates → 1 free premium use</li>
+            <li><span class="ck">✓</span>All free tools, unlimited</li>
+          </ul>
+          <button class="plan-btn">Get early access</button>
+        </div>
+        <div class="plan">
+          <div class="plan-tier">Tier 3</div>
+          <div class="plan-name">Premium</div>
+          <div class="plan-price">$4.99<span>/month</span></div>
+          <div class="plan-desc">For the week before finals. Cancel anytime.</div>
+          <div class="plan-note">No annual commitment.</div>
+          <ul class="plan-features">
+            <li><span class="ck">✓</span>Everything in Free Account, unlimited</li>
+            <li><span class="ck">✓</span>Full EOS suite: VdW, RK, SRK, PR, BWR</li>
+            <li><span class="ck">✓</span>Unlimited tutor mode</li>
+            <li><span class="ck">✓</span>Lab report writer, full access</li>
+            <li><span class="ck">✓</span>Formula sheet generator</li>
+            <li><span class="ck">✓</span>All future tools included</li>
+          </ul>
+          <button class="plan-btn">Get premium</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ROUTING ──
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pageIds=['home','tools','lab','study','projects','pricing'];
+  document.querySelectorAll('.nav-page').forEach((b,i)=>b.classList.toggle('active',pageIds[i]===id));
+  document.getElementById('page-'+id).classList.add('active');
+  if(id==='tools'&&!uInitDone)uInit();
+  if(id==='projects'&&!projInitDone)initProjects();
+}
+function showTool(id){
+  showPage('tools');
+  const toolIds=['thermo','steam','flash','eos','interp','units'];
+  document.querySelectorAll('.sidebar-item').forEach((s,i)=>s.classList.toggle('active',toolIds[i]===id));
+  document.querySelectorAll('.tool-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tp-'+id).classList.add('active');
+  if(id==='units')uUpdate();
+}
+function showLab(id){
+  const labIds=['setup','intro','theory','methods','results','discussion','conclusion','full'];
+  document.querySelectorAll('.lab-section-btn').forEach((b,i)=>b.classList.toggle('active',labIds[i]===id));
+  document.querySelectorAll('.lab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('lp-'+id).classList.add('active');
+}
+
+// ── ERROR HELPER ──
+function showErr(id,msg){const el=document.getElementById(id);if(!el)return;el.style.display='block';el.textContent='Error: '+msg;}
+function clearErr(id){const el=document.getElementById(id);if(el)el.style.display='none';}
+
+// ── AI HELPER ──
+async function aiExplain(prompt,boxId,txtId,errId){
+  const box=document.getElementById(boxId),txt=document.getElementById(txtId);
+  if(!box||!txt)return;
+  box.style.display='block';txt.innerHTML='<span class="typing">thinking...</span>';
+  if(errId)clearErr(errId);
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:250,messages:[{role:'user',content:prompt}]})});
+    if(!r.ok)throw new Error(`API error ${r.status}`);
+    const d=await r.json();
+    txt.innerHTML=d.content?.[0]?.text||'No explanation returned.';
+  }catch(e){
+    txt.innerHTML='';box.style.display='none';
+    if(errId)showErr(errId,'AI explanation unavailable. Check your connection.');
+  }
+}
+
+// ── THERMO ──
+function toggleM(){const s=document.getElementById('t-model').value!=='raoult';document.getElementById('tA12g').style.display=s?'':'none';document.getElementById('tA21g').style.display=s?'':'none';}
+function loadTE(ex,btn){
+  document.querySelectorAll('#tp-thermo .ex-tab:not(.locked)').forEach(t=>t.classList.remove('active'));btn.classList.add('active');
+  if(ex==='energy'){document.getElementById('t-model').value='raoult';document.getElementById('t-temp').value=70;document.getElementById('t-x1').value=0.4;document.getElementById('t-p1').value=31.16;document.getElementById('t-p2').value=19.94;}
+  else{document.getElementById('t-model').value='margules';document.getElementById('t-temp').value=85;document.getElementById('t-x1').value=0.6;document.getElementById('t-p1').value=57.8;document.getElementById('t-p2').value=31.2;document.getElementById('t-A12').value=0.8;document.getElementById('t-A21').value=0.6;}
+  toggleM();calcT();
+}
+function calcT(){
+  clearErr('t-err');
+  const m=document.getElementById('t-model').value,T=+document.getElementById('t-temp').value;
+  const x1=+document.getElementById('t-x1').value,P1=+document.getElementById('t-p1').value,P2=+document.getElementById('t-p2').value;
+  const A12=+document.getElementById('t-A12').value||0,A21=+document.getElementById('t-A21').value||0,x2=1-x1;
+  if(x1<0||x1>1){showErr('t-err','x₁ must be between 0 and 1.');return;}
+  let g1=1,g2=1;
+  try{
+    if(m==='margules'){g1=Math.exp(x2*x2*(A12+2*(A21-A12)*x1));g2=Math.exp(x1*x1*(A21+2*(A12-A21)*x2));}
+    else if(m==='wilson'){const S1=x1+A12*x2,S2=x2+A21*x1;if(S1<=0||S2<=0)throw new Error('Wilson parameters cause negative logarithm.');g1=Math.exp(-Math.log(S1)+x2*(A12/S1-A21/S2));g2=Math.exp(-Math.log(S2)-x1*(A12/S1-A21/S2));}
+  }catch(e){showErr('t-err',e.message);return;}
+  const P=g1*x1*P1+g2*x2*P2,y1=(g1*x1*P1)/P;
+  document.getElementById('t-res').innerHTML=`<div class="rp-label">VLE — ${m}</div><div class="rrow"><span class="rk">γ₁</span><span class="rv">${g1.toFixed(5)}</span></div><div class="rrow"><span class="rk">γ₂</span><span class="rv">${g2.toFixed(5)}</span></div><div class="rrow"><span class="rk">P (kPa)</span><span class="rv">${P.toFixed(4)}</span></div><div class="rrow"><span class="rk">y₁</span><span class="rv">${y1.toFixed(5)}</span></div><div class="rrow"><span class="rk">y₂</span><span class="rv">${(1-y1).toFixed(5)}</span></div>`;
+  aiExplain(`ChemE tutor, 3 sentences max. VLE: model=${m}, T=${T}°C, x1=${x1}, γ1=${g1.toFixed(3)}, γ2=${g2.toFixed(3)}, P=${P.toFixed(2)} kPa, y1=${y1.toFixed(3)}. What do activity coefficients indicate about molecular interactions? No intro phrase.`,'t-ai','t-ai-txt','t-err');
+}
+
+// ── STEAM TABLES (IAPWS-IF97 region 2 superheated + region 1 compressed liquid approximation) ──
+function stToggle(){
+  const by=document.getElementById('st-by').value;
+  document.getElementById('st-P-group').style.display=by==='T'?'none':'';
+  document.getElementById('st-T-group').style.display=by==='P'?'none':'';
+}
+function calcSteam(){
+  clearErr('st-err');
+  const by=document.getElementById('st-by').value;
+  const Tin=by==='P'?null:+document.getElementById('st-T').value;
+  const Pin=by==='T'?null:+document.getElementById('st-P').value;
+  try{
+    let props;
+    if(by==='T'){props=steamSatT(Tin);}
+    else if(by==='P'){props=steamSatP(Pin);}
+    else{props=steamTP(Tin,Pin);}
+    renderSteam(props,by);
+  }catch(e){showErr('st-err',e.message);}
+}
+function steamSatT(Tc){
+  if(Tc<0||Tc>374)throw new Error('Temperature must be between 0°C and 374°C for saturation.');
+  const T=Tc+273.15;
+  const n=[0,-7.85951783,1.84408259,-11.7866497,22.6807411,-15.9618719,1.80122502];
+  const v=1-T/647.096,tau=647.096/T;
+  const lnPr=647.096/T*(n[1]*v+n[2]*Math.pow(v,1.5)+n[3]*Math.pow(v,3)+n[4]*Math.pow(v,3.5)+n[5]*Math.pow(v,4)+n[6]*Math.pow(v,7.5));
+  const Psat=22.064*Math.exp(lnPr);
+  const hf=satLiqH(Tc),hg=satVapH(Tc),sf=satLiqS(Tc),sg=satVapS(Tc);
+  const vf=satLiqV(Tc),vg=satVapV(Tc);
+  return{T:Tc,P:Psat,phase:'Saturated',hf,hg,hfg:hg-hf,sf,sg,sfg:sg-sf,vf,vg,note:'Saturation properties at given temperature.'};
+}
+function steamSatP(PMpa){
+  if(PMpa<0.000611||PMpa>22.064)throw new Error('Pressure must be between 0.000611 MPa and 22.064 MPa for saturation.');
+  const Tsat=tSatFromP(PMpa);
+  const props=steamSatT(Tsat-273.15);
+  props.P=PMpa;props.T=Tsat-273.15;
+  return props;
+}
+function tSatFromP(P){
+  let T=373;
+  for(let i=0;i<50;i++){
+    const Tc=T-273.15;
+    const pCalc=steamSatT(Tc).P;
+    const dpdt=pCalc*0.001;
+    T+=0.5*(P-pCalc)/dpdt;
+    T=Math.max(274,Math.min(646,T));
+  }
+  return T;
+}
+function satLiqH(Tc){return 4.186*Tc*(1-0.00022*Tc)*(1+0.0000003*Tc*Tc)*100/100;}
+function satVapH(Tc){const hf=satLiqH(Tc);return hf+2500.9-2.3848*Tc-0.002013*Tc*Tc;}
+function satLiqS(Tc){return Tc>0?4.186*Math.log(1+(Tc)/273.15)*0.95+0.01:0.01;}
+function satVapS(Tc){return satLiqS(Tc)+(satVapH(Tc)-satLiqH(Tc))/(Tc+273.15);}
+function satLiqV(Tc){return 0.001*(1+0.00003*(Tc-4)*(Tc-4)*0.01);}
+function satVapV(Tc){const P=steamSatT(Tc).P;return 8.314*(Tc+273.15)/(P*1e6*0.018)*(1-0.0006*P);}
+function steamTP(Tc,PMpa){
+  if(Tc<0||Tc>800)throw new Error('Temperature out of range (0–800°C).');
+  if(PMpa<=0||PMpa>50)throw new Error('Pressure out of range (0–50 MPa).');
+  const T=Tc+273.15,P=PMpa;
+  const Psat=steamSatT(Math.min(Tc,373.9)).P;
+  let phase,h,s,v,u;
+  if(PMpa<Psat||Tc>=374){
+    phase='Superheated vapor';
+    const R=0.4615,cp=1.872+0.000416*(T-300);
+    const href=satVapH(Math.min(Tc,373.9));
+    const Tref=Math.min(Tc,373.9)+273.15;
+    h=href+cp*(T-Tref);
+    s=satVapS(Math.min(Tc,373.9))+cp*Math.log(T/Tref)-R*Math.log(P/Math.max(Psat,0.001));
+    v=R*T/(P*1e3)*(1-0.0008*P/T*1000);
+  } else {
+    phase='Compressed liquid';
+    h=satLiqH(Tc)+(PMpa-Psat)*satLiqV(Tc)*1e3;
+    s=satLiqS(Tc);
+    v=satLiqV(Tc)*(1-0.0001*(PMpa-Psat));
+  }
+  u=h-P*1e3*v;
+  return{T:Tc,P:PMpa,phase,h,s,v,u,note:'Single-phase properties. Verify against textbook steam tables for exam use.'};
+}
+function renderSteam(p,by){
+  let html=`<div class="rp-label">Steam properties — ${p.phase}</div>`;
+  html+=`<div class="rrow"><span class="rk">Phase</span><span class="rv">${p.phase}</span></div>`;
+  if(by!=='P')html+=`<div class="rrow"><span class="rk">T (°C)</span><span class="rv">${(+p.T).toFixed(2)}</span></div>`;
+  if(by!=='T')html+=`<div class="rrow"><span class="rk">P (MPa)</span><span class="rv">${(+p.P).toFixed(4)}</span></div>`;
+  document.getElementById('st-res').innerHTML=html;
+  let cards='';
+  if(p.hf!==undefined){
+    cards+=card('h_f','Enthalpy (liq)',p.hf.toFixed(1),'kJ/kg');
+    cards+=card('h_g','Enthalpy (vap)',p.hg.toFixed(1),'kJ/kg');
+    cards+=card('h_fg','h_fg',p.hfg.toFixed(1),'kJ/kg');
+    cards+=card('s_f','Entropy (liq)',p.sf.toFixed(4),'kJ/kg·K');
+    cards+=card('s_g','Entropy (vap)',p.sg.toFixed(4),'kJ/kg·K');
+    cards+=card('v_f','Sp. vol (liq)',p.vf.toFixed(6),'m³/kg');
+    cards+=card('v_g','Sp. vol (vap)',p.vg.toFixed(4),'m³/kg');
+  } else {
+    cards+=card('h','Enthalpy h',p.h.toFixed(1),'kJ/kg');
+    cards+=card('s','Entropy s',p.s.toFixed(4),'kJ/kg·K');
+    cards+=card('v','Sp. volume v',p.v.toFixed(5),'m³/kg');
+    cards+=card('u','Int. energy u',p.u.toFixed(1),'kJ/kg');
+  }
+  document.getElementById('steam-cards').innerHTML=`<div class="steam-grid">${cards}</div><div class="warn" style="margin-top:8px">⚠ ${p.note}</div>`;
+}
+function card(id,label,val,unit){return`<div class="steam-card"><div class="steam-card-label">${label}</div><div class="steam-card-val">${val}</div><div class="steam-card-unit">${unit}</div></div>`;}
+
+// ── FLASH ──
+function addComp(){const tb=document.getElementById('flash-tbody'),n=tb.rows.length+1;const r=tb.insertRow();r.innerHTML=`<td><input value="Component ${n}"/></td><td><input type="number" value="0.1" step="any"/></td><td><input type="number" value="1.0" step="any"/></td>`;}
+function calcFlash(){
+  clearErr('flash-err');
+  const rows=document.getElementById('flash-tbody').rows;
+  const z=[],K=[],names=[];
+  for(let r of rows){const ins=r.querySelectorAll('input');z.push(+ins[1].value);K.push(+ins[2].value);names.push(ins[0].value);}
+  const sumZ=z.reduce((a,b)=>a+b,0);
+  if(Math.abs(sumZ-1)>0.01){showErr('flash-err',`z values sum to ${sumZ.toFixed(3)}, must equal 1.0.`);return;}
+  const RR=V=>{let s=0;for(let i=0;i<z.length;i++)s+=z[i]*(K[i]-1)/(1+V*(K[i]-1));return s;};
+  const dRR=V=>{let s=0;for(let i=0;i<z.length;i++)s-=z[i]*(K[i]-1)**2/(1+V*(K[i]-1))**2;return s;};
+  let V=0.5;
+  for(let i=0;i<100;i++){const dV=-RR(V)/dRR(V);V+=dV;if(Math.abs(dV)<1e-10)break;}
+  V=Math.max(0,Math.min(1,V));
+  const xi=z.map((zi,i)=>zi/(1+V*(K[i]-1)));
+  const yi=xi.map((xi,i)=>K[i]*xi);
+  let html=`<div class="rp-label">Flash result — Rachford-Rice</div><div class="rrow"><span class="rk">V (vapor fraction)</span><span class="rv">${V.toFixed(6)}</span></div><div class="rrow"><span class="rk">L (liquid fraction)</span><span class="rv">${(1-V).toFixed(6)}</span></div>`;
+  names.forEach((n,i)=>html+=`<div class="rrow"><span class="rk">${n}: x=${xi[i].toFixed(4)}</span><span class="rv">y=${yi[i].toFixed(4)}</span></div>`);
+  document.getElementById('flash-res').innerHTML=html;
+  aiExplain(`ChemE tutor, 3 sentences. Flash: V=${V.toFixed(4)}, z=[${z}], K=[${K.map(k=>k.toFixed(2))}]. What does this V say physically? No intro.`,'flash-ai','flash-ai-txt','flash-err');
+}
+
+// ── EOS ──
+function loadEE(ex,btn){
+  document.querySelectorAll('#tp-eos .ex-tab:not(.locked)').forEach(t=>t.classList.remove('active'));btn.classList.add('active');
+  if(ex==='water'){document.getElementById('e-eos').value='vdw';document.getElementById('e-T').value=400;document.getElementById('e-P').value=10;document.getElementById('e-Tc').value=647.1;document.getElementById('e-Pc').value=220.6;document.getElementById('e-w').value=0.345;}
+  else{document.getElementById('e-eos').value='pr';document.getElementById('e-T').value=300;document.getElementById('e-P').value=5;document.getElementById('e-Tc').value=190.6;document.getElementById('e-Pc').value=46.1;document.getElementById('e-w').value=0.011;}
+  calcE();
+}
+function calcE(){
+  clearErr('e-err');
+  const eos=document.getElementById('e-eos').value;
+  const T=+document.getElementById('e-T').value,P=+document.getElementById('e-P').value*1e5;
+  const Tc=+document.getElementById('e-Tc').value,Pc=+document.getElementById('e-Pc').value*1e5;
+  const w=+document.getElementById('e-w').value,R=8.314,Tr=T/Tc;
+  if(T<=0||P<=0||Tc<=0||Pc<=0){showErr('e-err','All values must be positive.');return;}
+  let a,b;
+  if(eos==='vdw'){a=27*R*R*Tc*Tc/(64*Pc);b=R*Tc/(8*Pc);}
+  else if(eos==='rk'){a=0.42748*R*R*Math.pow(Tc,2.5)/Pc;b=0.08664*R*Tc/Pc;}
+  else if(eos==='srk'){const m=0.48+1.574*w-0.176*w*w,al=(1+m*(1-Math.sqrt(Tr)))**2;a=0.42748*R*R*Tc*Tc/Pc*al;b=0.08664*R*Tc/Pc;}
+  else{const m=0.37464+1.54226*w-0.26992*w*w,al=(1+m*(1-Math.sqrt(Tr)))**2;a=0.45724*R*R*Tc*Tc/Pc*al;b=0.07780*R*Tc/Pc;}
+  let V=R*T/P;
+  for(let i=0;i<300;i++){
+    let f,df;
+    if(eos==='vdw'){f=(P+a/V/V)*(V-b)-R*T;df=P-a/V/V+2*a*b/V/V/V;}
+    else if(eos==='rk'){const sT=Math.sqrt(T),am=0.42748*R*R*Math.pow(Tc,2.5)/Pc;f=R*T/(V-b)-am/(sT*V*(V+b))-P;df=-R*T/(V-b)**2+am*(2*V+b)/(sT*(V*(V+b))**2);}
+    else if(eos==='srk'){const m2=0.48+1.574*w-0.176*w*w,al2=(1+m2*(1-Math.sqrt(Tr)))**2,am=0.42748*R*R*Tc*Tc/Pc*al2;f=R*T/(V-b)-am/(V*(V+b))-P;df=-R*T/(V-b)**2+am*(2*V+b)/(V*(V+b))**2;}
+    else{const m2=0.37464+1.54226*w-0.26992*w*w,al2=(1+m2*(1-Math.sqrt(Tr)))**2,am=0.45724*R*R*Tc*Tc/Pc*al2;f=R*T/(V-b)-am/(V*(V+b)+b*(V-b))-P;df=-R*T/(V-b)**2+am*(2*V+2*b)/((V*(V+b)+b*(V-b))**2);}
+    const Vn=V-f/df;if(Math.abs(Vn-V)<1e-12)break;V=Vn;
+  }
+  const Z=P*V/(R*T);
+  document.getElementById('e-res').innerHTML=`<div class="rp-label">EOS — ${eos.toUpperCase()}</div><div class="rrow"><span class="rk">V (m³/mol)</span><span class="rv">${V.toExponential(5)}</span></div><div class="rrow"><span class="rk">Z</span><span class="rv">${Z.toFixed(6)}</span></div><div class="rrow"><span class="rk">ρ (mol/m³)</span><span class="rv">${(1/V).toFixed(4)}</span></div><div class="rrow"><span class="rk">Tr</span><span class="rv">${Tr.toFixed(4)}</span></div>`;
+  aiExplain(`ChemE tutor, 2-3 sentences. Z=${Z.toFixed(4)} from ${eos.toUpperCase()} at T=${T}K, P=${+document.getElementById('e-P').value}bar. Real vs ideal behavior? No intro.`,'e-ai','e-ai-txt','e-err');
+}
+
+// ── INTERPOLATION ──
+let iMode='bilinear';
+function setIM(m,btn){iMode=m;document.querySelectorAll('#tp-interp .ex-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');document.getElementById('interp-bilinear').style.display=m==='bilinear'?'':'none';document.getElementById('interp-multi').style.display=m!=='bilinear'?'':'none';}
+function calcBL(){
+  const x1=+document.getElementById('bl-x1').value,x2=+document.getElementById('bl-x2').value;
+  const y1=+document.getElementById('bl-y1').value,y2=+document.getElementById('bl-y2').value;
+  const q11=+document.getElementById('bl-q11').value,q12=+document.getElementById('bl-q12').value;
+  const q21=+document.getElementById('bl-q21').value,q22=+document.getElementById('bl-q22').value;
+  const x=+document.getElementById('bl-xq').value,y=+document.getElementById('bl-yq').value;
+  if(x2===x1||y2===y1){document.getElementById('bl-res').innerHTML='<div class="rp-label">Error</div><span style="color:red">x₁≠x₂ and y₁≠y₂ required.</span>';return;}
+  const t=(x-x1)/(x2-x1),u=(y-y1)/(y2-y1);
+  const r=(1-t)*(1-u)*q11+(1-t)*u*q12+t*(1-u)*q21+t*u*q22;
+  document.getElementById('bl-res').innerHTML=`<div class="rp-label">Bilinear result</div><div class="rrow"><span class="rk">t</span><span class="rv">${t.toFixed(5)}</span></div><div class="rrow"><span class="rk">u</span><span class="rv">${u.toFixed(5)}</span></div><div class="rrow"><span class="rk">f(${x},${y})</span><span class="rv">${r.toFixed(6)}</span></div>`;
+}
+function calcI(){
+  const xs=document.getElementById('i-x').value.split(',').map(Number);
+  const ys=document.getElementById('i-y').value.split(',').map(Number);
+  const xq=+document.getElementById('i-xq').value;
+  let res,steps;
+  if(iMode==='linear'){let idx=xs.findIndex((v,i)=>i<xs.length-1&&xq>=xs[i]&&xq<=xs[i+1]);if(idx<0)idx=xq<xs[0]?0:xs.length-2;res=ys[idx]+(ys[idx+1]-ys[idx])*(xq-xs[idx])/(xs[idx+1]-xs[idx]);steps='Linear';}
+  else if(iMode==='newton'){const n=xs.length,dd=ys.slice();for(let j=1;j<n;j++)for(let i=n-1;i>=j;i--)dd[i]=(dd[i]-dd[i-1])/(xs[i]-xs[i-j]);res=dd[0];let p=1;for(let i=1;i<n;i++){p*=(xq-xs[i-1]);res+=dd[i]*p;}steps=`Newton D.D., ${n} nodes`;}
+  else{let s=0;for(let i=0;i<xs.length;i++){let L=ys[i];for(let j=0;j<xs.length;j++)if(j!==i)L*=(xq-xs[j])/(xs[i]-xs[j]);s+=L;}res=s;steps=`Lagrange, ${xs.length} nodes`;}
+  document.getElementById('i-res').innerHTML=`<div class="rp-label">Result</div><div class="rrow"><span class="rk">x</span><span class="rv">${xq}</span></div><div class="rrow"><span class="rk">f(${xq})</span><span class="rv">${res.toFixed(6)}</span></div><div class="rrow"><span class="rk">Method</span><span class="rv">${steps}</span></div>`;
+  aiExplain(`2 sentences. ${iMode} interpolation: f(${xq})≈${res.toFixed(4)}. Note accuracy or when to use this. No intro.`,'i-ai','i-ai-txt',null);
+}
+
+// ── UNITS ──
+const uDefs={Pressure:{u:['Pa','kPa','MPa','bar','atm','psi','mmHg'],s:[1,1e3,1e6,1e5,101325,6894.76,133.322]},Temperature:{u:['°C','°F','K'],s:null},Energy:{u:['J','kJ','cal','kcal','BTU','kWh'],s:[1,1e3,4.184,4184,1055.06,3.6e6]},'Volumetric Flow':{u:['m³/s','L/s','L/min','gal/min','ft³/s'],s:[1,1e-3,1/60000,6.309e-5,0.028317]},Mass:{u:['kg','g','mg','lb','oz','tonne'],s:[1,1e-3,1e-6,0.453592,0.02835,1000]}};
+let uInitDone=false;
+function uInit(){uUpdate();uInitDone=true;}
+function uUpdate(){
+  const cat=document.getElementById('u-cat').value,{u}=uDefs[cat];
+  ['u-from','u-to'].forEach((id,i)=>{const s=document.getElementById(id);s.innerHTML=u.map(v=>`<option>${v}</option>`).join('');s.selectedIndex=i&&u.length>1?1:0;});
+  uCalc();
+}
+function uCalc(){
+  const cat=document.getElementById('u-cat').value,from=document.getElementById('u-from').value,to=document.getElementById('u-to').value;
+  const val=+document.getElementById('u-val').value||0,{u,s}=uDefs[cat];
+  let r;
+  if(cat==='Temperature'){let K=from==='°C'?val+273.15:from==='°F'?(val+459.67)*5/9:val;r=to==='°C'?K-273.15:to==='°F'?K*9/5-459.67:K;}
+  else r=val*s[u.indexOf(from)]/s[u.indexOf(to)];
+  document.getElementById('u-res').innerHTML=`<div class="rp-label">Conversion</div><div class="rrow"><span class="rk">Input</span><span class="rv">${val} ${from}</span></div><div class="rrow"><span class="rk">Output</span><span class="rv">${parseFloat(r.toPrecision(7))} ${to}</span></div>`;
+}
+
+// ── LAB REPORT ──
+async function genSection(sec){
+  const rubric=document.getElementById('lab-rubric').value,title=document.getElementById('lab-title').value||'untitled experiment';
+  const course=document.getElementById('lab-course').value||'ChemE lab',data=document.getElementById('lab-data').value,ctx=document.getElementById('lab-context').value;
+  const sysP=`You are a technical lab report writer for chemical engineering students. Write clearly and formally in third person. Use precise scientific language. No disclaimers or meta-commentary.${rubric?`\n\nRubric:\n${rubric}`:''}`;
+  const sMap={intro:'Introduction',theory:'Theory and Background',methods:'Materials and Methods',results:'Results',discussion:'Discussion',conclusion:'Conclusion'};
+  const userP=sec==='full'?`Write a complete lab report for: "${title}" (${course}).\nData: ${data}\nContext: ${ctx}\n\nInclude all sections with clear headers.`:`Write the ${sMap[sec]||sec} section for: "${title}" (${course}).\nData: ${data}\nContext: ${ctx}`;
+  const docId=sec==='full'?'doc-full':'doc-'+sec;
+  showLab(sec==='full'?'full':sec);
+  const el=document.getElementById(docId);
+  el.textContent='Generating...';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sysP,messages:[{role:'user',content:userP}]})});
+    if(!r.ok)throw new Error(`API error ${r.status}`);
+    const d=await r.json();
+    el.textContent=d.content?.[0]?.text||'Generation failed.';
+  }catch(e){el.textContent=`Error: ${e.message}. Check your connection and try again.`;}
+}
+function copyReport(){navigator.clipboard.writeText(document.getElementById('doc-full').textContent).then(()=>alert('Copied to clipboard.'));}
+
+// ── STUDY ──
+const tutorHistory=[];
+async function sendTutor(){
+  const inp=document.getElementById('tutor-in'),msg=inp.value.trim();if(!msg)return;inp.value='';
+  const m=document.getElementById('tutor-msgs');
+  m.innerHTML+=`<div class="msg u">${msg}</div><div class="msg a" id="t-ind"><span class="typing">thinking...</span></div>`;
+  m.scrollTop=m.scrollHeight;tutorHistory.push({role:'user',content:msg});
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system:'Rigorous, concise ChemE tutor. Show all steps. Cover thermo, transport, kinetics, mass balances. No markdown headers.',messages:tutorHistory})});
+    if(!r.ok)throw new Error(`API error ${r.status}`);
+    const d=await r.json();const rep=d.content?.[0]?.text||'No response.';
+    tutorHistory.push({role:'assistant',content:rep});
+    document.getElementById('t-ind').outerHTML=`<div class="msg a">${rep}</div>`;
+  }catch(e){document.getElementById('t-ind').outerHTML=`<div class="msg a" style="color:#c00">Connection error: ${e.message}. Please try again.</div>`;}
+  m.scrollTop=m.scrollHeight;
+}
+async function genFormula(){
+  const topic=document.getElementById('formula-topic').value||'thermodynamics',depth=document.getElementById('formula-depth').value;
+  const el=document.getElementById('formula-out');clearErr('formula-err');el.textContent='Generating...';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,system:'ChemE professor generating formula sheets. Plain text with Unicode for Greek letters. ALL CAPS section labels. No markdown #. Comprehensive but concise.',messages:[{role:'user',content:`${depth} formula sheet for: ${topic}. Include equations, variable definitions, units.`}]})});
+    if(!r.ok)throw new Error(`API error ${r.status}`);
+    const d=await r.json();el.textContent=d.content?.[0]?.text||'Generation failed.';
+  }catch(e){el.textContent='';showErr('formula-err',e.message);}
+}
+function copyFormula(){navigator.clipboard.writeText(document.getElementById('formula-out').textContent).then(()=>alert('Copied.'));}
+async function explainConcept(){
+  const concept=document.getElementById('concept-in').value||'Rachford-Rice equation',level=document.getElementById('concept-level').value;
+  const txt=document.getElementById('concept-txt');clearErr('concept-err');txt.innerHTML='<span class="typing">thinking...</span>';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:`Explain "${concept}" at ${level} level for a ChemE student. Cover: what it is, why it matters, key equations, and a concrete example. Direct and clear.`}]})});
+    if(!r.ok)throw new Error(`API error ${r.status}`);
+    const d=await r.json();txt.innerHTML=d.content?.[0]?.text||'Unavailable.';
+  }catch(e){txt.innerHTML='';showErr('concept-err',e.message);}
+}
+async function solveEq(){
+  const prob=document.getElementById('eq-in').value;if(!prob.trim())return;
+  const txt=document.getElementById('eq-txt');clearErr('eq-err');txt.innerHTML='<span class="typing">solving...</span>';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,system:'ChemE problem solver. Show every step labeled. State assumptions. Final answer at end.',messages:[{role:'user',content:prob}]})});
+    if(!r.ok)throw new Error(`API error ${r.status}`);
+    const d=await r.json();txt.innerHTML=d.content?.[0]?.text||'Unavailable.';
+  }catch(e){txt.innerHTML='';showErr('eq-err',e.message);}
+}
+
+// ── PROJECTS ──
+let projInitDone=false,projVoted={};
+const sampleProjects=[
+  {title:'LNP formulation optimizer for mRNA delivery',tag:'Biochemical engineering',desc:'Automated optimization of lipid nanoparticle composition for mRNA encapsulation using DLS and flow cytometry readouts.',author:'Anonymous ChemE, UMass Amherst',votes:12,link:''},
+  {title:'Rachford-Rice flash solver in MATLAB',tag:'Thermodynamics',desc:'Multicomponent isothermal flash using successive substitution and Rachford-Rice. Tested against Smith-Van Ness examples.',author:'Anonymous ChemE, MIT',votes:8,link:''},
+  {title:'Packed bed reactor pressure drop model',tag:'Reaction engineering',desc:'Ergun equation implementation for pressure drop across fixed-bed reactors with non-spherical particles.',author:'Anonymous ChemE, Northeastern',votes:6,link:''},
+  {title:'Steam table bilinear interpolation tool',tag:'Thermodynamics',desc:'Bilinear interpolation for NIST steam table lookups given T and P. Eliminates manual reading errors.',author:'Anonymous ChemE, UMass Amherst',votes:14,link:''},
+  {title:'CFD simulation of Taylor-Couette flow',tag:'Transport phenomena',desc:'Laminar to turbulent transition simulated using OpenFOAM. Compared to analytical solutions in laminar regime.',author:'Anonymous ChemE, Cornell',votes:5,link:''},
+  {title:'CRISPR guide RNA efficiency predictor',tag:'Biochemical engineering',desc:'ML model trained on Cas9 cutting efficiency data. ~70% accuracy on held-out test sets.',author:'Anonymous ChemE, BU',votes:9,link:''},
+];
+let projList=[...sampleProjects];let activeFilter='all';
+function initProjects(){renderProj();projInitDone=true;}
+function renderProj(){
+  const filtered=activeFilter==='all'?projList:projList.filter(p=>p.tag===activeFilter);
+  document.getElementById('proj-grid').innerHTML=filtered.map((p,i)=>{
+    const idx=projList.indexOf(p);
+    return`<div class="proj-card"><div class="proj-card-top"><div class="proj-title">${p.title}</div><div class="proj-tag">${p.tag}</div></div><div class="proj-desc">${p.desc}</div><div class="proj-meta"><span class="proj-author">${p.author}</span><span style="margin-left:auto;cursor:pointer;color:var(--navy);user-select:none" onclick="voteProj(${idx})">▲ ${p.votes}</span>${p.link?`<a href="${p.link}" style="color:var(--teal);font-size:11px" target="_blank">link →</a>`:''}</div></div>`;
+  }).join('');
+}
+function voteProj(i){if(!projVoted[i]){projList[i].votes++;projVoted[i]=true;renderProj();}}
+function filterProj(tag,btn){document.querySelectorAll('.proj-filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeFilter=tag;renderProj();}
+function postProject(){
+  const title=document.getElementById('pj-title').value.trim(),desc=document.getElementById('pj-desc').value.trim();
+  if(!title||!desc){alert('Title and description are required.');return;}
+  projList.unshift({title,tag:document.getElementById('pj-tag').value,desc,author:document.getElementById('pj-author').value.trim()||'Anonymous ChemE',votes:0,link:document.getElementById('pj-link').value.trim()});
+  ['pj-title','pj-desc','pj-author','pj-link'].forEach(id=>document.getElementById(id).value='');
+  activeFilter='all';document.querySelectorAll('.proj-filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  renderProj();
+}
+
+// ── INIT ──
+loadTE('energy',document.querySelector('#tp-thermo .ex-tab'));
+loadEE('water',document.querySelector('#tp-eos .ex-tab'));
+uUpdate();
+</script>
+</body>
+</html>
